@@ -1,0 +1,40 @@
+openBmap logger version 0.1
+
+What you should expect:
+* generation of logs
+* upload of logs
+
+Manual:
+Interface is straightforward.
+
+* A button to start generating logs. Values will be displayed when
+valid. Logs are stored under HOME/.openBmap/Logs by default.
+* A button to stop generating logs.
+
+Note that at the moment, the GSM part gets updated only after
+receiving an asynchronous update from the network. This
+means at start time, it is normal the GSM part does not display
+GSM information, even if you are registered to network.
+
+* A button to upload. This will block the interface until every log has been uploaded.
+This means that if you do not have Internet connection up and
+running, the GUI will be frozen until timeout of the upload part.
+After succesfull upload, the logs are moved to 
+HOME/.openBmap/Processed_logs by default.
+
+Warning: you should create an account on realtimeblog.free.fr
+website, and fill the login/password in the configuration file
+before upload works.
+
+* A button to exit.
+
+Config file and application log are located under HOME/.openBmap
+directory by default.
+
+Known bugs:
+* when you are generating logs, and you press 'Stop' button.
+  A popup window let you know you should wait for the logger to
+  finish stopping. Under FSO M5, if you press the power
+  button, the phone suspends. You press it again it wakes up.
+  Nevertheless the GUI is frozen. You will have to kill the
+  process.

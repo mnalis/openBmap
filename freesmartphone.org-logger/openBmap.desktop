@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=OBM
+Comment=Logs GSM and GPS and upload to openBmap.
+Encoding=UTF-8
+Version=0.1
+Type=Application
+Exec=openBmapGTK
+Icon=openBmap-desktop
+Terminal=true
+Categories=GTK;Application;PIM
+SingleInstance=true
+StartupNotify=true
+Categories=Office;

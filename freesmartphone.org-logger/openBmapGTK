@@ -1,0 +1,160 @@
+#!/usr/bin/env python
+
+# Copyright 2008, 2009 Ronan DANIELLOU
+# Copyright 2008, 2009 Onen (onen.om@free.fr)
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+import sys
+try:
+ 	import pygtk
+  	pygtk.require("2.0")
+except:
+  	pass
+try:
+	import gtk
+  	import gtk.glade
+except:
+	sys.exit(1)
+import logging
+import gobject
+
+import openbmap.logger
+
+class openBmapGTK:
+    """This is a GTK frontend for the openBmap logger."""
+
+    def __init__(self):
+
+        #Set the Glade file
+        self.gladefile = "/usr/share/openBmap/Main.glade"  
+        self.wTree = gtk.glade.XML(self.gladefile) 
+		
+        #Get the Main Window, and connect the "destroy" event
+        self.window = self.wTree.get_widget("windowMain")
+        if (self.window):
+            self.window.connect("destroy", self.exit_obm)
+            
+        self._gsmLabel = self.wTree.get_widget('displayGsm')
+        self._gsmLabel2 = self.wTree.get_widget('displayCidStrength')
+        self._gpsPositionLabel = self.wTree.get_widget('displayGpsPosition')
+        self._gpsAltitudeLabel = self.wTree.get_widget('displayGpsAlt')
+        self._dops = self.wTree.get_widget('displayDops')
+        self._speed = self.wTree.get_widget('displaySpeed')
+        self._stopLogging = self.wTree.get_widget('buttonStopLogging')
+        self._startLogging = self.wTree.get_widget('buttonGenerateLog')
+        
+        #Create our dictionay and connect it
+        dic = { "NextWindow" : self.next_window,
+               "StopLogging" : self.stop_logging,
+               "StartLogging" : self.start_logging,
+               "Upload" : self.upload }
+        self.wTree.signal_autoconnect(dic)
+        
+        self._plsWait = gtk.MessageDialog(self.window,
+                                    gtk.DIALOG_MODAL,
+                                    gtk.MESSAGE_INFO,
+                                    gtk.BUTTONS_NONE,
+                                    'Stopping the logger. Please wait...')
+        
+        self._obmlogger = openbmap.logger.ObmLogger()
+        self._obmlogger.register(self)
+        self._obmlogger.init_openBmap()
+        
+    def next_window(self, widget):
+        """Cycle through the windows."""
+        #TODO: not yet implemented: Exit right now
+        # timeout_add schedules the first call at the soonest in 'timeout' seconds
+        self.exit_obm(widget)
+        gobject.timeout_add_seconds(2, self.exit_obm, widget)
+        
+    def stop_logging(self, widget):
+        self._plsWait.text = 'Stopping the logger. Please wait...'
+        self._plsWait.show_all()
+        while gtk.events_pending():
+            gtk.main_iteration(False)
+        self._obmlogger.stop_logging()
+        
+    def exit_obm(self, widget):
+        logging.debug('Exiting on request of the user.')
+        if self._obmlogger.is_logging():
+            self.stop_logging(widget)
+            logging.debug('Still logging, wait...')
+            # to keep being called by timeout_add
+            return True
+        else:
+            logging.debug('Exiting...')
+            gobject.idle_add(gtk.main_quit, )
+        
+    def start_logging(self, widget):
+        self._obmlogger.start_logging()
+        
+    def notify(self):
+        """This method will be called by the observable we are registered too upon change."""
+        logging.debug('View notified for changes.')
+        (valid, MCC, MNC, lac, cid, strength) = self._obmlogger.get_gsm_data()
+        if valid:
+            self._gsmLabel.set_text("%s / %s / %s" % (MCC, MNC, lac))
+            self._gsmLabel2.set_text("%s / %s" % (cid, strength))
+        else:
+            for w in [self._gsmLabel, self._gsmLabel2]:
+                w.set_text("N/A")
+        
+        (valid, tstamp, lat, lng, alt, pdop, hdop, vdop, speed, heading) = self._obmlogger.get_gps_data()
+        if valid:
+            self._gpsPositionLabel.set_text('%s / %s' % (lat, lng))
+            self._gpsAltitudeLabel.set_text('%s' % alt)
+            self._dops.set_text('%s/%s/%s' % (pdop, hdop, vdop))
+            self._speed.set_text('%s' % speed)
+        else:
+            for w in [self._gpsPositionLabel, self._gpsAltitudeLabel, self._dops,
+                       self._speed]:
+                w.set_text('N/A')
+        isLogging = self._obmlogger.is_logging()
+        self._startLogging.set_sensitive(not isLogging)
+        self._stopLogging.set_sensitive(isLogging)
+        if not isLogging:
+            self._plsWait.hide()
+                
+    def upload(self, widget):
+        """Upload logs to OpenBmap database."""
+        plsWait = gtk.MessageDialog(self.window,
+                                    gtk.DIALOG_MODAL,
+                                    gtk.MESSAGE_INFO,
+                                    gtk.BUTTONS_NONE,
+                                    'Trying to upload logs. Please wait...')
+        plsWait.show_all()
+        while gtk.events_pending():
+            gtk.main_iteration(False)
+        (uploaded, totalFilesUploaded, totalFilesToUpload) = self._obmlogger.send_logs()
+        plsWait.destroy()
+        if uploaded:
+            plsWait = gtk.MessageDialog(self.window,
+                                        gtk.DIALOG_MODAL,
+                                        gtk.MESSAGE_INFO,
+                                        gtk.BUTTONS_OK,
+                                        '%i out of %i log files uploaded.\nThanks for your contribution!' %
+                                        (totalFilesUploaded, totalFilesToUpload))
+        else:
+            plsWait = gtk.MessageDialog(self.window,
+                                        gtk.DIALOG_MODAL,
+                                        gtk.MESSAGE_ERROR,
+                                        gtk.BUTTONS_OK,
+                                        'Upload failed.\nSee application log for details.')
+        plsWait.run()
+        plsWait.destroy()
+            
+if __name__ == "__main__":
+	hwg = openBmapGTK()
+	gtk.main()
