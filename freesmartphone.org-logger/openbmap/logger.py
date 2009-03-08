@@ -42,6 +42,7 @@ class Gsm:
         self._lac = -1
         self._cid = -1
         self._strength = -1
+        self._networkAccessType = ''
         self._MCC = ''
         self._MNC = ''
         self._registrationGSM = ''
@@ -58,6 +59,8 @@ class Gsm:
                                           'org.freesmartphone.GSM.Network',
                                           'org.freesmartphone.ogsmd',
                                           '/org/freesmartphone/GSM/Device')
+            self._gsmMonitoringIface = dbus.Interface( bus.get_object('org.freesmartphone.ogsmd', '/org/freesmartphone/GSM/Device'),
+                                                       "org.freesmartphone.GSM.Monitor" )
 
     def network_status_handler(self, data, *args, **kwargs):
         """Handler for org.freesmartphone.GSM.Network.Status signal.
@@ -74,9 +77,10 @@ class Gsm:
                 logging.info('Registration status is: %s. Skip.' % data['registration'])
                 raise Exception, 'GSM data not available.'
                     
-            if "lac" and "cid" and "strength" and "code" in data:
+            if "lac" and "cid" and "strength" and "code" and "act" in data:
                 self._MCC = (str(data['code'])[:3]).lstrip('0')
                 self._MNC = (str(data['code'])[3:]).lstrip('0')
+                self._networkAccessType = data['act']
                 # lac and cid are hexadecimal strings
                 self._lac = str(int(data["lac"], 16))
                 self._cid = str(int(data["cid"], 16))
@@ -95,9 +99,8 @@ class Gsm:
                 if data["strength"] == 0:
                     raise Exception, 'GSM strength (0) not suitable.'
                 else:
-                    val_from_modem = int( round(math.exp(data["strength"] * math.log( 31 ) /100)) )
-                    # translate to dBm (see 3GPP documentation TS 07.07 Chapter 8.5, GSM 07.07 command +CSQ)
-                    self._strength = val_from_modem * 2 - 113 
+                    self._strength = self.signal_percent_to_dbm( data["strength"] )
+                    val_from_modem = (self._strength + 113 ) / 2
                     self._registrationGSM = data['registration']
                     logging.info("MCC %s MNC %s LAC %s, CID %s, strength %i/%i/%i (dBm, modem, percent 0-100)" % \
                                  (self._MCC, self._MNC, self._lac, self._cid,
@@ -120,6 +123,7 @@ class Gsm:
         self._MNC = ''
         self._strength = 0
         self._registrationGSM = ''
+        self._networkAccessType = ''
     
     def get_device_info(self):
         """If available, returns the manufacturer, model and revision."""
@@ -145,26 +149,104 @@ class Gsm:
         # see 3GPP documentation TS 07.07 Chapter 8.5, GSM 07.07 command +CSQ
         return (self._strength >= -113 and self._strength <= -53)
     
+    def signal_percent_to_dbm(self, val):
+        """Translate the signal percent value to dbm."""
+        # The signal strength in percent (0-100) is returned.
+        # Mickey pointed out (see dev mailing list archive):
+        # in module ogsmd.gsm.const:
+        #def signalQualityToPercentage( signal ):
+        #"""
+        #Returns a percentage depending on a signal quality strength.
+        #"""
+        #<snip>
+        #if signal == 0 or signal > 31:
+        #    return 0
+        #else:
+        #    return int( round( math.log( signal ) / math.log( 31 ) * 100 ) )
+        val_from_modem = int( round(math.exp(val * math.log( 31 ) /100)) )
+        # translate to dBm (see 3GPP documentation TS 07.07 Chapter 8.5, GSM 07.07 command +CSQ)
+        return val_from_modem * 2 - 113
+    
+    def get_neighbour_cell_info(self):
+        """Returns a tuple of dictionaries, one for each cell.
+        
+        Each dictionary contains lac and cid fields.
+        They may contain rxlev, c1, c2, and ctype.
+        """
+        results = []
+        try:
+            data = self._gsmMonitoringIface.GetNeighbourCellInformation()
+            for cell in data:
+                logging.debug( 'Raw data neighbour cell: %s' % cell)
+                if "lac" and "cid" in cell:
+                    # lac and cid are hexadecimal strings
+                    result = {}
+                    result['lac'] = str(int(cell["lac"], 16))
+                    result['cid'] = str(int(cell["cid"], 16))
+                    # The signal strength in percent (0-100) is returned.
+                    # The following comments were about the signal strength (see GetStatus):
+                        # Mickey pointed out (see dev mailing list archive):
+                        # in module ogsmd.gsm.const:
+                        #def signalQualityToPercentage( signal ):
+                        #"""
+                        #Returns a percentage depending on a signal quality strength.
+                        #"""
+                        #<snip>
+                        #if signal == 0 or signal > 31:
+                        #    return 0
+                        #else:
+                        #    return int( round( math.log( signal ) / math.log( 31 ) * 100 ) )
+                    if 'rxlev' in cell:
+                        logging.debug('Neighbour cell rxlev is %s' % cell['rxlev'])
+                        if cell['rxlev'] == 0:
+                            raise Exception, 'GSM strength (0) not suitable.'
+                        else:
+                            result['rxlev'] = self.signal_percent_to_dbm( cell['rxlev'] )
+                    if 'c1' in cell:
+                        result['c1'] = self.signal_percent_to_dbm( cell['c1'] )
+                    if 'c2' in cell:
+                        result['c2'] = self.signal_percent_to_dbm( cell['c2'] )
+                    if 'ctype' in cell:
+                        result['ctype'] = ('NA', 'GSM', 'GPRS')[cell['ctype']]
+                    logging.debug( 'Neighbour cell result: %s' % result)
+                    if int(result['cid']) == 0:
+                        # I have seen cid of 0. This does not make sense?
+                        logging.info('Neighbour cell with cell id of 0 discarded.')
+                    else:
+                        results.append(result)
+        except Exception, e:
+            logging.error('get neighbour cells info: %s' % str(e))
+            return ()
+        return tuple(results)
+        
     def get_gsm_data(self):
-        """Return validity boolean, MCC, MNC, lac, cid, signal strength.
+        """Return validity boolean, MCC, MNC, lac, cid, signal strength, tuple of neighbour cells dictionaries.
         
         Operation is atomic, values cannot be modified while reading it.
         The validity boolean is True when all fields are valid and consistent,
-        False otherwise."""
+        False otherwise.
+        Each neighbour cell dictionary contains lac and cid fields.
+        They may contain rxlev, c1, c2, and ctype.
+        """
         logging.debug("Wait for reading GSM data.")
         self.acquire_lock()
         logging.debug("Lock acquired, reading GSM data.")
-        (valid, mcc, mnc, lac, cid, strength) = (self.check_GSM(),
-                                                 self._MCC,
-                                                 self._MNC,
-                                                 self._lac,
-                                                 self._cid,
-                                                 self._strength)
+        (valid, mcc, mnc, lac, cid, strength, act) = (self.check_GSM(),
+                                                      self._MCC,
+                                                      self._MNC,
+                                                      self._lac,
+                                                      self._cid,
+                                                      self._strength,
+                                                      self._networkAccessType)
         logging.info("valid=%s, MCC=%s, MNC=%s, lac=%s, cid=%s, strength=%s" %
-                     (valid, mcc, mnc, lac, cid, strength)) 
+                     (valid, mcc, mnc, lac, cid, strength))
+        neighbourCells = ()
+        if valid: 
+            neighbourCells = self.get_neighbour_cell_info()
+            
         self.release_lock()
         logging.debug("GSM data read, lock released.")
-        return (valid, mcc, mnc, lac, cid, strength)
+        return (valid, (mcc, mnc, lac, cid, strength, act), neighbourCells )
     
     def acquire_lock(self):
         """Acquire the lock to prevent state of the GSM variables to be modified."""
@@ -366,7 +448,7 @@ class ObmLogger():
     def test_write_obm_log(self):
         self.write_obm_log(str(datetime.now()), 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
     
-    def write_obm_log(self, date, tstamp, mcc, mnc, lac, cellid, rssi, lng, lat, alt, spe, heading, hdop, vdop, pdop):
+    def write_obm_log(self, date, tstamp, servingCell, lng, lat, alt, spe, heading, hdop, vdop, pdop, neighbourCells):
         """Write the OpenBMap log file."""
         # From Python doc: %f -> The precision determines the number of digits after the decimal point and defaults to 6.
         # A difference of the sixth digit in lat/long leads to a difference of under a meter of precision.
@@ -387,13 +469,19 @@ class ObmLogger():
         # heading in decimal degrees
         headingPrecision = 9
         logmsg = "<scan time=\"%s\">" % time.strftime('%Y%m%d%H%M%S', time.gmtime(tstamp)) + \
-        "<gsm mcc=\"%s" % mcc + \
-        "\" mnc=\"%s\"" % mnc + \
-        " lac=\"%s\"" % lac +\
-        " id=\"%s\"" % cellid + \
-        " ss=\"%i\"" % rssi + \
-        "/>" + \
-        "<gps time=\"%s\"" % date + \
+        "<gsm mcc=\"%s\" mnc=\"%s\" lac=\"%s\" id=\"%s\" ss=\"%i\" serving=\"1\" act=\"%s\" />" % servingCell
+        
+        for cell in neighbourCells:
+            logmsg += "<gsm lac=\"%s\"" % cell['lac'] +\
+            " id=\"%s\"" % cell['cid'] + \
+            " ss=\"%i\"" % cell['rxlev'] + \
+            " serving=\"0\"" + \
+            " c1=\"%i\"" % cell['c1'] + \
+            " c2=\"%i\"" % cell['c2'] + \
+            " ctype=\"%s\"" % cell['ctype'] + \
+            "/>"
+        
+        logmsg += "<gps time=\"%s\"" % date + \
         " lng=\"%s\"" % ( ('%.*f' % (latLonPrecision, lng)).rstrip('0').rstrip('.') ) + \
         " lat=\"%s\"" % ( ('%.*f' % (latLonPrecision, lat)).rstrip('0').rstrip('.') ) + \
         " alt=\"%s\"" % ( ('%.*f' % (altitudePrecision, alt)).rstrip('0').rstrip('.') ) + \
@@ -432,8 +520,7 @@ class ObmLogger():
             except Exception, e:
                 logging.error("Error while writing GSM/GPS log to file: %s" % str(e))
         self.fileToSendLock.release()
-        logging.info('OpenBmap log file lock released.')    
-        
+        logging.info('OpenBmap log file lock released.')
         
     def send_logs(self):
         """Try uploading available log files to OBM database.
@@ -563,7 +650,7 @@ class ObmLogger():
         #logging.debug("LogGenerator - adate3 = " + adate3)
 
         (validGps, tstamp, lat, lng, alt, pdop, hdop, vdop, spe, heading) = self.get_gps_data()
-        (validGsm, MCC, MNC, lac, cid, strength) = self.get_gsm_data()
+        (validGsm, servingCell, neighbourCells) = self.get_gsm_data()
         # the test upon the speed, prevents from logging many times the same position with the same cell.
         # Nevertheless, it also prevents from logging the same position with the cell changing...
         if spe < minSpeed:
@@ -571,11 +658,12 @@ class ObmLogger():
         elif spe > maxSpeed:
             logging.info('Log rejected because speed (%g) is over maximal speed (%g).' % (spe, maxSpeed))
         elif validGps and validGsm:
-            self.write_obm_log(adate2, tstamp, MCC, MNC, lac, cid, strength, lng, lat, alt, spe, heading, hdop, vdop, pdop)
+            self.write_obm_log(adate2, tstamp, servingCell, lng, lat, alt, spe, heading, hdop, vdop, pdop,
+                               neighbourCells)
         else:
             logging.info('Data were not valid for creating openBmap log.')
-            logging.debug("Validity=%s, MCC=%s, MNC=%s, lac=%s, cid=%s, strength=%i"
-                          % (validGsm, MCC, MNC, lac, cid, strength))
+            logging.debug("Validity=%s, MCC=%s, MNC=%s, lac=%s, cid=%s, strength=%i, act=%s"
+                          % ((validGsm,) + servingCell) )
             logging.debug("Validity=%s, lng=%f, lat=%f, alt=%f, spe=%f, hdop=%f, vdop=%f, pdop=%f" \
                           % (validGps, lng, lat, alt, spe, hdop, vdop, pdop))
         
@@ -638,7 +726,11 @@ class ObmLogger():
         
         
     def get_gsm_data(self):
-        """Return Fields validity boolean, MCC, MNC, lac, cid, signal strength."""
+        """Return Fields validity boolean, MCC, MNC, lac, cid, signal strength, tuple of neighbour cells dictionaries.
+        
+        Each neighbour cell dictionary contains lac and cid fields.
+        They may contain rxlev, c1, c2, and ctype.
+        """
         return self._gsm.get_gsm_data()
         
     def get_gps_data(self):
@@ -670,8 +762,8 @@ class ObmLogger():
         return (True, 345678, 2.989123456923999, 69.989123456123444, 2.896, 6.123, 2.468, 3.1, 3.456, 10)
     
     def simulate_gsm_data(self):
-        """Return simulated Fields validity boolean, MCC, MNC, lac, cid, signal strength."""
-        return (True, '208', '1', '123', '4', -123)
+        """Return simulated Fields validity boolean, (MCC, MNC, lac, cid, signal strength, act), neighbour cells."""
+        return (True, ('208', '1', '123', '4', -123, 'GSM'), ())
         
 #----------------------------------------------------------------------------#
 # program starts here

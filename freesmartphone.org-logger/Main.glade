@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Sat Feb  7 16:03:48 2009 -->
+<!--Generated with glade3 3.4.5 on Sat Mar  7 17:45:47 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="windowMain">
     <property name="visible">True</property>
@@ -13,48 +13,79 @@
             <property name="n_rows">6</property>
             <property name="n_columns">2</property>
             <child>
-              <widget class="GtkLabel" id="displayGpsAlt">
+              <widget class="GtkLabel" id="labelGPSLatLng">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">N/A</property>
+                <property name="label" translatable="yes">GPS Lat/Lng :</property>
               </widget>
               <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">1</property>
-                <property name="bottom_attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkLabel" id="label1">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">Altitude :</property>
-              </widget>
-              <packing>
-                <property name="top_attach">1</property>
-                <property name="bottom_attach">2</property>
                 <property name="x_options"></property>
               </packing>
             </child>
             <child>
-              <widget class="GtkLabel" id="displayDops">
+              <widget class="GtkLabel" id="displayGpsPosition">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">N/A</property>
               </widget>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="right_attach">2</property>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
               </packing>
             </child>
             <child>
-              <widget class="GtkLabel" id="labelHPVDop">
+              <widget class="GtkLabel" id="labelLacCid">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">HPV-Dop :</property>
+                <property name="label" translatable="yes">GSM CID/Strength/ access type :</property>
               </widget>
               <packing>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
+                <property name="top_attach">5</property>
+                <property name="bottom_attach">6</property>
+                <property name="x_options"></property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="displayCidStrength">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">N/A</property>
+              </widget>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">5</property>
+                <property name="bottom_attach">6</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="labelGsm">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">GSM MCC/MNC/LAC :</property>
+              </widget>
+              <packing>
+                <property name="top_attach">4</property>
+                <property name="bottom_attach">5</property>
+                <property name="x_options"></property>
+                <property name="x_padding">4</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="displayGsm">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">N/A</property>
+              </widget>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">4</property>
+                <property name="bottom_attach">5</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="labelSpeed">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Speed (km/h) :</property>
+              </widget>
+              <packing>
+                <property name="top_attach">3</property>
+                <property name="bottom_attach">4</property>
                 <property name="x_options"></property>
               </packing>
             </child>
@@ -71,80 +102,49 @@
               </packing>
             </child>
             <child>
-              <widget class="GtkLabel" id="labelSpeed">
+              <widget class="GtkLabel" id="labelHPVDop">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Speed (km/h) :</property>
+                <property name="label" translatable="yes">HPV-Dop :</property>
               </widget>
               <packing>
-                <property name="top_attach">3</property>
-                <property name="bottom_attach">4</property>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
                 <property name="x_options"></property>
               </packing>
             </child>
             <child>
-              <widget class="GtkLabel" id="displayGsm">
+              <widget class="GtkLabel" id="displayDops">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">N/A</property>
               </widget>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="right_attach">2</property>
-                <property name="top_attach">4</property>
-                <property name="bottom_attach">5</property>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
               </packing>
             </child>
             <child>
-              <widget class="GtkLabel" id="labelGsm">
+              <widget class="GtkLabel" id="label1">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">GSM MCC/MNC/LAC :</property>
+                <property name="label" translatable="yes">Altitude :</property>
               </widget>
               <packing>
-                <property name="top_attach">4</property>
-                <property name="bottom_attach">5</property>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
                 <property name="x_options"></property>
-                <property name="x_padding">4</property>
               </packing>
             </child>
             <child>
-              <widget class="GtkLabel" id="displayCidStrength">
+              <widget class="GtkLabel" id="displayGpsAlt">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">N/A</property>
               </widget>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="right_attach">2</property>
-                <property name="top_attach">5</property>
-                <property name="bottom_attach">6</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkLabel" id="labelLacCid">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">GSM CID/Strength :</property>
-              </widget>
-              <packing>
-                <property name="top_attach">5</property>
-                <property name="bottom_attach">6</property>
-                <property name="x_options"></property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkLabel" id="displayGpsPosition">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">N/A</property>
-              </widget>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkLabel" id="labelGPSLatLng">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">GPS Lat/Lng :</property>
-              </widget>
-              <packing>
-                <property name="x_options"></property>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
               </packing>
             </child>
           </widget>
@@ -155,44 +155,20 @@
             <property name="n_rows">2</property>
             <property name="n_columns">2</property>
             <child>
-              <widget class="GtkButton" id="buttonNextWindow">
+              <widget class="GtkButton" id="buttonGenerateLog">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="response_id">0</property>
-                <signal name="clicked" handler="NextWindow"/>
+                <signal name="clicked" handler="StartLogging"/>
                 <child>
-                  <widget class="GtkImage" id="imageButtonExit">
+                  <widget class="GtkImage" id="image2">
                     <property name="visible">True</property>
-                    <property name="pixbuf">ExitButton.png</property>
+                    <property name="pixbuf">GenerateButton.png</property>
                   </widget>
                 </child>
               </widget>
               <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">1</property>
-                <property name="bottom_attach">2</property>
-                <property name="y_options">GTK_FILL</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkButton" id="buttonUpload">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="response_id">0</property>
-                <signal name="clicked" handler="Upload"/>
-                <child>
-                  <widget class="GtkImage" id="image3">
-                    <property name="visible">True</property>
-                    <property name="pixbuf">UploadButton.png</property>
-                  </widget>
-                </child>
-              </widget>
-              <packing>
-                <property name="top_attach">1</property>
-                <property name="bottom_attach">2</property>
                 <property name="y_options">GTK_FILL</property>
               </packing>
             </child>
@@ -218,20 +194,44 @@
               </packing>
             </child>
             <child>
-              <widget class="GtkButton" id="buttonGenerateLog">
+              <widget class="GtkButton" id="buttonUpload">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="response_id">0</property>
-                <signal name="clicked" handler="StartLogging"/>
+                <signal name="clicked" handler="Upload"/>
                 <child>
-                  <widget class="GtkImage" id="image2">
+                  <widget class="GtkImage" id="image3">
                     <property name="visible">True</property>
-                    <property name="pixbuf">GenerateButton.png</property>
+                    <property name="pixbuf">UploadButton.png</property>
                   </widget>
                 </child>
               </widget>
               <packing>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+                <property name="y_options">GTK_FILL</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkButton" id="buttonNextWindow">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="response_id">0</property>
+                <signal name="clicked" handler="NextWindow"/>
+                <child>
+                  <widget class="GtkImage" id="imageButtonExit">
+                    <property name="visible">True</property>
+                    <property name="pixbuf">ExitButton.png</property>
+                  </widget>
+                </child>
+              </widget>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
                 <property name="y_options">GTK_FILL</property>
               </packing>
             </child>

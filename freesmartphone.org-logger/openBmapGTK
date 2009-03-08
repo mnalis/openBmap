@@ -103,10 +103,10 @@ class openBmapGTK:
     def notify(self):
         """This method will be called by the observable we are registered too upon change."""
         logging.debug('View notified for changes.')
-        (valid, MCC, MNC, lac, cid, strength) = self._obmlogger.get_gsm_data()
+        (valid, servingCell, neighbourCells) = self._obmlogger.get_gsm_data()
         if valid:
-            self._gsmLabel.set_text("%s / %s / %s" % (MCC, MNC, lac))
-            self._gsmLabel2.set_text("%s / %s" % (cid, strength))
+            self._gsmLabel.set_text("%s / %s / %s" % servingCell[:3])
+            self._gsmLabel2.set_text("%s / %s / %s" % servingCell[3:])
         else:
             for w in [self._gsmLabel, self._gsmLabel2]:
                 w.set_text("N/A")
