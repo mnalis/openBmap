@@ -61,6 +61,8 @@ class Gsm:
                                           '/org/freesmartphone/GSM/Device')
             self._gsmMonitoringIface = dbus.Interface( bus.get_object('org.freesmartphone.ogsmd', '/org/freesmartphone/GSM/Device'),
                                                        "org.freesmartphone.GSM.Monitor" )
+            self._gsmNetworkIface = dbus.Interface( bus.get_object('org.freesmartphone.ogsmd', '/org/freesmartphone/GSM/Device'),
+                                                       "org.freesmartphone.GSM.Network" )
 
     def network_status_handler(self, data, *args, **kwargs):
         """Handler for org.freesmartphone.GSM.Network.Status signal.
@@ -248,6 +250,15 @@ class Gsm:
         logging.debug("GSM data read, lock released.")
         return (valid, (mcc, mnc, lac, cid, strength, act), neighbourCells )
     
+    def get_status(self):
+        """Get GSM status.
+        
+        Maps to org.freesmartphone.GSM.Network.GetStatus().
+        It uses network_status_handler() to parse the output.
+        """
+        status = self._gsmNetworkIface.GetStatus()
+        self.network_status_handler(status)
+        
     def acquire_lock(self):
         """Acquire the lock to prevent state of the GSM variables to be modified."""
         self.lock.acquire()
@@ -627,6 +638,10 @@ class ObmLogger():
         if not os.path.exists(dirProcessed):
             logging.info('Directory for storing processed cell logs does not exists, creating \'%s\'' % dirProcessed)
             os.mkdir(dirProcessed)
+            
+        # request the current status. If we are connected we get the data now. Otherwise
+        # we would need to wait for a signal update.
+        self._gsm.get_status()
         
     def log(self):
         logging.debug("OpenBmap logger runs.")
