@@ -284,7 +284,7 @@ class Config:
     CONFIGURATION_FILENAME = os.path.join(APP_HOME_DIR,
                                      'openBmap.conf')
     XML_LOG_VERSION = 'V2'
-    SOFTWARE_VERSION = '0.2.0'
+    SOFTWARE_VERSION = 'FSO 0.2.0'
     
     def __init__(self):        
         # strings which will be used in the configuration file
