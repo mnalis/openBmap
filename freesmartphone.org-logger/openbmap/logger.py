@@ -272,6 +272,8 @@ class Config:
                                      'openBmap.log')
     CONFIGURATION_FILENAME = os.path.join(APP_HOME_DIR,
                                      'openBmap.conf')
+    XML_LOG_VERSION = 'V2'
+    SOFTWARE_VERSION = '0.2.0'
     
     def __init__(self):        
         # strings which will be used in the configuration file
@@ -472,7 +474,7 @@ class ObmLogger():
         "<gsm mcc=\"%s\" mnc=\"%s\" lac=\"%s\" id=\"%s\" ss=\"%i\" serving=\"1\" act=\"%s\" />" % servingCell
         
         for cell in neighbourCells:
-            logmsg += "<gsm lac=\"%s\"" % cell['lac'] +\
+            logmsg += "<gsm mcc=\"%s\" mnc=\"%s\" lac=\"%s\"" % (servingCell[:2] + (cell['lac'],)) +\
             " id=\"%s\"" % cell['cid'] + \
             " ss=\"%i\"" % cell['rxlev'] + \
             " serving=\"0\"" + \
@@ -502,10 +504,11 @@ class ObmLogger():
             logDir = config.get(config.GENERAL, config.OBM_LOGS_DIR_NAME)
             
             # at the moment: log files follow: logYYYYMMDDhhmmss.xml
-            filename = os.path.join(logDir, 'log' + date + '.xml')
+            filename = os.path.join(logDir, config.XML_LOG_VERSION + '_log' + date + '.xml')
             # if the file does not exist, we start it with the "header"
             logmsg = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + \
-            "<logfile manufacturer=\"%s\" model=\"%s\" revision=\"%s\">\n" % self._gsm.get_device_info()
+            "<logfile manufacturer=\"%s\" model=\"%s\" revision=\"%s\" software=\"%s\">\n" \
+            % ( self._gsm.get_device_info() + (config.SOFTWARE_VERSION,) )
             for log in self._logsInMemory:
                 logmsg += log
         #TODO: escaped characters wich would lead to malformed XML document (e.g. '"')
@@ -763,7 +766,14 @@ class ObmLogger():
     
     def simulate_gsm_data(self):
         """Return simulated Fields validity boolean, (MCC, MNC, lac, cid, signal strength, act), neighbour cells."""
-        return (True, ('208', '1', '123', '4', -123, 'GSM'), ())
+        return (True, ('208', '1', '123', '4', -123, 'GSM'), (
+                                                              {'mcc':'123',
+                                                               'mnc':'02',
+                                                               'cid':'123',
+                                                               'rxlev':456,
+                                                               'c1':-123,
+                                                               'c2':-234,
+                                                               'ctype':'GSM'}))
         
 #----------------------------------------------------------------------------#
 # program starts here
