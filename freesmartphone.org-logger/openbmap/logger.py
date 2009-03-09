@@ -594,6 +594,18 @@ class ObmLogger():
             logging.info('OpenBmap log file lock released.')
         return (result, totalFilesUploaded, totalFilesToUpload)
 
+    def delete_processed_logs(self):
+        """Deletes all the files located in the 'processed' folder. Returns number deleted."""
+        # no Lock used here, I don't see this needed for Processed logs...
+        dirProcessed = os.path.join(config.get(config.GENERAL, config.OBM_PROCESSED_LOGS_DIR_NAME))
+        deletedSoFar = 0
+        for f in os.listdir(dirProcessed):
+            toBeDeleted = os.path.join(dirProcessed, f)
+            os.remove(toBeDeleted)
+            deletedSoFar += 1
+            logging.info('Processed log file \'%s\' has been deleted.' % toBeDeleted)
+        return deletedSoFar
+        
     def check_obm_api_version(self):
         """Get the current openBmap server API version, and return True if it corresponds."""
         logging.debug('Checking the openBmap server interface Version...')

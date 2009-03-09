@@ -154,7 +154,23 @@ class openBmapGTK:
                                         'Upload failed.\nSee application log for details.')
         plsWait.run()
         plsWait.destroy()
-            
+
+        plsWait = gtk.MessageDialog(self.window,
+                                    gtk.DIALOG_MODAL,
+                                    gtk.MESSAGE_QUESTION,
+                                    gtk.BUTTONS_YES_NO,
+                                    'Do you want to delete all logs located in the Processed folder?')
+        if plsWait.run() == gtk.RESPONSE_YES:
+            plsWait.destroy()
+            plsWait = gtk.MessageDialog(self.window,
+                                        gtk.DIALOG_MODAL,
+                                        gtk.MESSAGE_INFO,
+                                        gtk.BUTTONS_OK,
+                                        '%i processed log files deleted.' %
+                                        self._obmlogger.delete_processed_logs())
+            plsWait.run()
+        plsWait.destroy()
+
 if __name__ == "__main__":
 	hwg = openBmapGTK()
 	gtk.main()
