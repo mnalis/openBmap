@@ -458,6 +458,17 @@ class ObmLogger():
             self.get_gps_data = self.simulate_gps_data
             self.get_gsm_data = self.simulate_gsm_data
 
+    def request_ressource(self, resource):
+        """Requests the given string resource through /org/freesmartphone/Usage."""
+        obj = self._bus.get_object('org.freesmartphone.ousaged', '/org/freesmartphone/Usage')
+        request = dbus.Interface(obj, 'org.freesmartphone.Usage').RequestResource(resource)
+        if (request == None):
+            logging.info("'%s' resource succesfully requested (%s)." % (resource, request))
+            return True
+        else:
+            logging.critical("ERROR requesting the resource '%s' (%s)" % (resource, request))
+            return False
+        
     def test_write_obm_log(self):
         self.write_obm_log(str(datetime.now()), 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
     
@@ -638,6 +649,8 @@ class ObmLogger():
     
     def init_openBmap(self):
         self._gps.request()
+        # this is intended to prevent the phone to go to suspend
+        self.request_ressource('CPU')
         
         logDir = config.get(config.GENERAL, config.OBM_LOGS_DIR_NAME)
         if not os.path.exists(logDir):
