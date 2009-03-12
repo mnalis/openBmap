@@ -129,6 +129,10 @@ class openBmapGTK:
                 
     def upload(self, widget):
         """Upload logs to OpenBmap database."""
+        if not self.check_credentials():
+            logging.debug('Upload aborted because credentials not validated.')
+            return
+
         plsWait = gtk.MessageDialog(self.window,
                                     gtk.DIALOG_MODAL,
                                     gtk.MESSAGE_INFO,
@@ -170,6 +174,40 @@ class openBmapGTK:
                                         self._obmlogger.delete_processed_logs())
             plsWait.run()
         plsWait.destroy()
+
+    def check_credentials(self):
+        """Returns True if credentials are validated, False otherwise"""
+        dialog = gtk.Dialog(title='Upload?',
+                            flags=gtk.DIALOG_MODAL,
+                            parent=self.window,
+                            buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                     gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
+        result = False
+        labelLogin = gtk.Label('Login:')
+        entryLogin = gtk.Entry(0)
+        login, password = self._obmlogger.get_credentials()
+        entryLogin.set_text(login)
+        labelPassword = gtk.Label('Password:')
+        entryPassword = gtk.Entry(0)
+        entryPassword.set_text(password)
+        widgetsTuple = labelLogin, entryLogin, labelPassword, entryPassword
+        for w in widgetsTuple:
+            dialog.vbox.add(w)
+        dialog.show_all()
+
+        if dialog.run() == gtk.RESPONSE_ACCEPT:
+            newLogin = entryLogin.get_text()
+            newPassword = entryPassword.get_text()
+            if (login != newLogin) or (password != newPassword):
+                logging.debug('Credentials modified (\'%s\', \'%s\') -> (\'%s\', \'%s\').' % \
+                            (login, password, newLogin, newPassword))
+                logging.info('Credentials changed, saving...')
+                self._obmlogger.set_credentials(newLogin, newPassword)
+            else:
+                logging.debug('Credentials unchanged.')
+            result = True
+        dialog.destroy()
+        return result
 
 if __name__ == "__main__":
 	hwg = openBmapGTK()

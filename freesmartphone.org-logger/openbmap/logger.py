@@ -360,6 +360,8 @@ class Config:
             logging.critical(str(e))
             #TODO: well in case this happens, this should be forwarded to Views (GUI) in order to inform the user
             sys.exit(-1)
+    def set(self, section, option, value):
+        self._config.set(section, option, value)
         
     def save_config(self):
         configFile = open(Config.CONFIGURATION_FILENAME, 'wb')
@@ -783,6 +785,18 @@ class ObmLogger():
         # knots * 1.852 = km/h
         return (valPos and valSpe, tstamp, lat, lng, alt, pdop, hdop, vdop, speed * 1.852, heading)
     
+    def get_credentials(self):
+        """Returns openBmap login, password."""
+        return (config.get(config.CREDENTIALS, config.OBM_LOGIN),
+                config.get(config.CREDENTIALS, config.OBM_PASSWORD))
+
+    def set_credentials(self, login, password):
+        """Sets the given login and password, saves the config file."""
+        config.set(config.CREDENTIALS, config.OBM_LOGIN, login)
+        config.set(config.CREDENTIALS, config.OBM_PASSWORD, password)
+        config.save_config()
+        logging.info('Credentials set to \'%s\', \'%s\'' % (login, password) )
+
     def is_logging(self):
         """Returns True if the logger is running, False otherwise."""
         self._loggerLock.acquire()
