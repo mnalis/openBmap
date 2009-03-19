@@ -288,8 +288,9 @@ class Gsm:
         logging.info("valid=%s, MCC=%s, MNC=%s, lac=%s, cid=%s, strength=%s" %
                      (valid, mcc, mnc, lac, cid, strength))
         neighbourCells = ()
-        if valid: 
-            neighbourCells = self.get_neighbour_cell_info()
+        # this is deactivated for release 0.2.0
+        #if valid: 
+        #    neighbourCells = self.get_neighbour_cell_info()
             
         self.release_lock()
         logging.debug("GSM data read, lock released.")
