@@ -52,6 +52,7 @@ class Gsm:
         self._revision = 'N/A'
         self.get_device_info()
         self._observers = []
+        self._call_ongoing = False
         
         if bus:
             bus.add_signal_receiver(self.network_status_handler,
@@ -59,10 +60,54 @@ class Gsm:
                                           'org.freesmartphone.GSM.Network',
                                           'org.freesmartphone.ogsmd',
                                           '/org/freesmartphone/GSM/Device')
+            bus.add_signal_receiver(self.call_status_handler,
+                                          'CallStatus',
+                                          'org.freesmartphone.GSM.Call',
+                                          'org.freesmartphone.ogsmd',
+                                          '/org/freesmartphone/GSM/Device')
             self._gsmMonitoringIface = dbus.Interface( bus.get_object('org.freesmartphone.ogsmd', '/org/freesmartphone/GSM/Device'),
                                                        "org.freesmartphone.GSM.Monitor" )
             self._gsmNetworkIface = dbus.Interface( bus.get_object('org.freesmartphone.ogsmd', '/org/freesmartphone/GSM/Device'),
                                                        "org.freesmartphone.GSM.Network" )
+            self._gsmCallIface = dbus.Interface( bus.get_object('org.freesmartphone.ogsmd', '/org/freesmartphone/GSM/Device'),
+                                                       "org.freesmartphone.GSM.Call" )
+
+    def call_status_handler(self, data, *args, **kwargs):
+        """This maps to org.freesmartphone.GSM.Call.CallStatus.
+        """
+        logging.debug('Call status change notified, gets the lock.')
+        self.acquire_lock()
+        # CallStatus ( isa{sv} )
+        #i: id
+        #The index of the call that changed its status or properties.
+        #s: status
+        #The new status of the call. Expected values are:
+        # * "incoming" = The call is incoming (but not yet accepted),
+        # * "outgoing" = The call is outgoing (but not yet established),
+        # * "active" = The call is the active call (you can talk),
+        # * "held" = The call is being held,
+        # * "release" = The call has been released.
+        self._call_ongoing = False
+        list = self._gsmCallIface.ListCalls()
+        for call in list:
+            index, status, properties = call
+            if status != 'release':
+                logging.info('Call ongoing: %i, %s.' % (index, status) )
+                self._call_ongoing = True
+        if not self._call_ongoing:
+            logging.info('No call ongoing left.')
+        logging.debug('Call status updated, released the lock.')
+        self.release_lock()
+
+    def call_ongoing(self):
+        """Returns True if a call is ongoing. False otherwise."""
+        logging.debug('call_ongoing() gets the lock.')
+        self.acquire_lock()
+        result = self._call_ongoing
+        logging.debug('call_ongoing()? %s' % result)
+        logging.debug('call_ongoing(), released the lock.')
+        self.release_lock()
+        return result
 
     def network_status_handler(self, data, *args, **kwargs):
         """Handler for org.freesmartphone.GSM.Network.Status signal.
@@ -521,6 +566,15 @@ class ObmLogger():
         logging.debug(logmsg)
         self.fileToSendLock.acquire()
         logging.info('OpenBmap log file lock acquired.')
+        #debug
+        #self._gsm._call_ongoing = True
+        #end of debug
+        if self._gsm.call_ongoing():
+            # see comments in log() about not logging in a call.
+            logging.info('write_obm_log() canceled because a call is ongoing.')
+            self.fileToSendLock.release()
+            logging.info('OpenBmap log file lock released.')
+            return
         self._logsInMemory.append(logmsg)
         if len(self._logsInMemory) < config.get(config.GENERAL, config.NB_OF_LOGS_PER_FILE):
             logging.debug('Max logs per file not reached, wait to write to a file.')
@@ -670,6 +724,9 @@ class ObmLogger():
         # we would need to wait for a signal update.
         self._gsm.get_status()
         
+        # check if we have no ongoing call...
+        self._gsm.call_status_handler(None)
+
     def log(self):
         logging.debug("OpenBmap logger runs.")
         self._loggerLock.acquire()
@@ -694,25 +751,39 @@ class ObmLogger():
         #adate3 = now.strftime("%d %m %Y at %H:%M")
         #logging.debug("LogGenerator - adate3 = " + adate3)
 
-        (validGps, tstamp, lat, lng, alt, pdop, hdop, vdop, spe, heading) = self.get_gps_data()
-        (validGsm, servingCell, neighbourCells) = self.get_gsm_data()
-        # the test upon the speed, prevents from logging many times the same position with the same cell.
-        # Nevertheless, it also prevents from logging the same position with the cell changing...
-        if spe < minSpeed:
-            logging.info('Log rejected because speed (%g) is under minimal speed (%g).' % (spe, minSpeed))
-        elif spe > maxSpeed:
-            logging.info('Log rejected because speed (%g) is over maximal speed (%g).' % (spe, maxSpeed))
-        elif validGps and validGsm:
-            self.write_obm_log(adate2, tstamp, servingCell, lng, lat, alt, spe, heading, hdop, vdop, pdop,
-                               neighbourCells)
+        if self._gsm.call_ongoing():
+            # When a call is ongoing, the signal strength diminishes
+            # (without a DBus signal to notify it), and neighbour cells data returned is garbage:
+            # thus we do not log during a call.
+            # I fear that when the framework notifies this program about call status change, some
+            # time has passed since the modem has taken it into account. This could result in effects
+            # described above (e.g. the neighbour cells data we have read is already garbage), but as
+            # we still have
+            # not received and taken into account the call, we don't know that the data is bad. To
+            # prevent this, I check just before reading the data, and I will check again just before
+            # writing it, hoping to have let enough time to never see the (possible?) situation
+            # described above.
+            logging.info('Log canceled because a call is ongoing.')
         else:
-            logging.info('Data were not valid for creating openBmap log.')
-            logging.debug("Validity=%s, MCC=%s, MNC=%s, lac=%s, cid=%s, strength=%i, act=%s"
-                          % ((validGsm,) + servingCell) )
-            logging.debug("Validity=%s, lng=%f, lat=%f, alt=%f, spe=%f, hdop=%f, vdop=%f, pdop=%f" \
-                          % (validGps, lng, lat, alt, spe, hdop, vdop, pdop))
+            (validGps, tstamp, lat, lng, alt, pdop, hdop, vdop, spe, heading) = self.get_gps_data()
+            (validGsm, servingCell, neighbourCells) = self.get_gsm_data()
+            # the test upon the speed, prevents from logging many times the same position with the same cell.
+            # Nevertheless, it also prevents from logging the same position with the cell changing...
+            if spe < minSpeed:
+                logging.info('Log rejected because speed (%g) is under minimal speed (%g).' % (spe, minSpeed))
+            elif spe > maxSpeed:
+                logging.info('Log rejected because speed (%g) is over maximal speed (%g).' % (spe, maxSpeed))
+            elif validGps and validGsm:
+                self.write_obm_log(adate2, tstamp, servingCell, lng, lat, alt, spe, heading, hdop, vdop, pdop,
+                                   neighbourCells)
+            else:
+                logging.info('Data were not valid for creating openBmap log.')
+                logging.debug("Validity=%s, MCC=%s, MNC=%s, lac=%s, cid=%s, strength=%i, act=%s"
+                              % ((validGsm,) + servingCell) )
+                logging.debug("Validity=%s, lng=%f, lat=%f, alt=%f, spe=%f, hdop=%f, vdop=%f, pdop=%f" \
+                              % (validGps, lng, lat, alt, spe, hdop, vdop, pdop))
         
-        self.notify_observers()
+            self.notify_observers()
         duration = datetime.now() - startTime
         logging.info("Logging loop ended, total duration: %i sec)." % duration.seconds)
 
