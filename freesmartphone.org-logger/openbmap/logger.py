@@ -540,8 +540,10 @@ class ObmLogger():
         hvpdopPrecision = 2
         # heading in decimal degrees
         headingPrecision = 9
+        # revert to previous log format, for release 0.2.0
+        #"<gsm mcc=\"%s\" mnc=\"%s\" lac=\"%s\" id=\"%s\" ss=\"%i\" serving=\"1\" act=\"%s\" />" % servingCell
         logmsg = "<scan time=\"%s\">" % time.strftime('%Y%m%d%H%M%S', time.gmtime(tstamp)) + \
-        "<gsm mcc=\"%s\" mnc=\"%s\" lac=\"%s\" id=\"%s\" ss=\"%i\" serving=\"1\" act=\"%s\" />" % servingCell
+        "<gsm mcc=\"%s\" mnc=\"%s\" lac=\"%s\" id=\"%s\" ss=\"%i\"/>" % servingCell[:5]
         
         for cell in neighbourCells:
             logmsg += "<gsm mcc=\"%s\" mnc=\"%s\" lac=\"%s\"" % (servingCell[:2] + (cell['lac'],)) +\
@@ -583,11 +585,16 @@ class ObmLogger():
             logDir = config.get(config.GENERAL, config.OBM_LOGS_DIR_NAME)
             
             # at the moment: log files follow: logYYYYMMDDhhmmss.xml
-            filename = os.path.join(logDir, config.XML_LOG_VERSION + '_log' + date + '.xml')
+            # revert to previous log format, for release 0.2.0
+            #filename = os.path.join(logDir, config.XML_LOG_VERSION + '_log' + date + '.xml')
+            filename = os.path.join(logDir, 'log' + date + '.xml')
             # if the file does not exist, we start it with the "header"
             logmsg = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + \
-            "<logfile manufacturer=\"%s\" model=\"%s\" revision=\"%s\" software=\"%s\">\n" \
-            % ( self._gsm.get_device_info() + (config.SOFTWARE_VERSION,) )
+            "<logfile manufacturer=\"%s\" model=\"%s\" revision=\"%s\">\n" \
+            % self._gsm.get_device_info()
+            # revert to previous log format, for release 0.2.0
+            #"<logfile manufacturer=\"%s\" model=\"%s\" revision=\"%s\" software=\"%s\">\n" \
+            #% ( self._gsm.get_device_info() + (config.SOFTWARE_VERSION,) )
             for log in self._logsInMemory:
                 logmsg += log
         #TODO: escaped characters wich would lead to malformed XML document (e.g. '"')
