@@ -1,37 +1,107 @@
-openBmap logger version 0.1
+openBmap logger version 0.2.0
+
+SUMMARY:
+The purpose of this software is to log GSM data, together with
+GPS coordinate. This data are sent to a website (www.openbmap.org),
+in order to build a free database. In order to keep a high quality
+of data, we store GPS quality, speed, GSM signal strength, etc...
+Possible use of this database:
+* get your location based on the current GSM cell you are connected to.
+(GPS needs extra power to function, GSM is always on. Less precise
+than GPS, but enough for a lot of usages. Instant location, GPS
+needs time to get a fix.)
+* speed up GPS first time to fix by providing the location based
+on GSM data
+* geolocate your photos when taken
+* get a map of GSM coverage
+* get a map of 2, 2.5, 3G coverage (not yet implemented)
+* ...
+
+What's new since 0.1?
+* The complete process is now done through graphical interface!
+* Neighbour cells logging code is present, but deactivated. The
+reasons are:
+ - we need to clarify the meaning of some fields
+ - we need to clarify if there is no risk of mixing cells and
+   MCC/MNC at the borders.
+* Now displays GSM data at startup. No need to wait for network
+  update.
+* Before upload, login/password graphical interface added.
+* After upload, asks about deleting all processed log files.
+* Requests CPU ressource to prevent phone from going to suspend (this
+depends on the configuration of the phone...).
+* Do not log if a call is ongoing. The reasons are:
+ - when in a call org.freesmartphone.GSM.Network.GetStatus()
+   returns a lower signal strength.
+ - org.freesmartphone.GSM.Monitor.GetNeighbourCellInformation()
+   returns garbage when in a call.
 
 What you should expect:
-* generation of logs
+* The complete process is done through graphical interface.
+* Requests CPU ressource to prevent phone from going to suspend (this
+depends on the configuration of the phone...).
+* generation of logs (no log during a call)
+* Graphical window to enter login/password before upload (possibility
+to cancel upload).
 * upload of logs
+* Graphical window proposing to delete all logs already processed.
 
-Manual:
+MANUAL:
 Interface is straightforward.
 
 * A button to start generating logs. Values will be displayed when
 valid. Logs are stored under HOME/.openBmap/Logs by default.
+
 * A button to stop generating logs.
 
-Note that at the moment, the GSM part gets updated only after
-receiving an asynchronous update from the network. This
-means at start time, it is normal the GSM part does not display
-GSM information, even if you are registered to network.
+* A button to upload.
+This pops a window up, which displays the current login/password.
+Please modify it before pressing 'ok' button if needed. You can
+cancel upload by pressing 'cancel'.
 
-* A button to upload. This will block the interface until every log has been uploaded.
-This means that if you do not have Internet connection up and
-running, the GUI will be frozen until timeout of the upload part.
+If you press 'ok', this will block the interface until every log
+has been uploaded. This means that if you do not have Internet
+connection up and running, the GUI will be frozen until timeout of
+the upload part.
+
 After succesfull upload, the logs are moved to 
 HOME/.openBmap/Processed_logs by default.
 
-Warning: you should create an account on realtimeblog.free.fr
-website, and fill the login/password in the configuration file
-before upload works.
+When upload is finished, the result is first displayed (how many logs
+have been uploaded out of how many available).
+Then a popup window will propose you to delete all (this includes
+possible logs from previous upload) the processed logs (located in
+HOME/.openBmap/Processed_logs by default).
 
-* A button to exit.
+Warning: you should create an account on realtimeblog.free.fr
+website, and fill a correct login/password in the popup window
+displayed before upload works.
+
+* A button to exit (if logger is active, it will first stop it
+cleanly, and then exits).
 
 Config file and application log are located under HOME/.openBmap
 directory by default.
 
-Known bugs:
+You can modify values in the config files (by editing it). This
+way you can have a fine grained control of your logger:
+- change the locations of logs
+'openbmap logs directory name', 'openbmap uploaded logs directory name'
+- change the rate of logging
+openbmap logger default scanning speed (in sec.) = 10
+- set a minimal speed for logging
+gps minimal speed for logging (km/h) = 0
+- set a maximal speed for logging
+gps maximal speed for logging (km/h) = 150
+- please do not modify other values, this could prevent the
+logger from working correctly.
+
+If you break your configuration file, just exit the application.
+Delete the configuration file (by default: HOME/.openBmap/openBmap.conf).
+Launch the application. The configuration file, if not found is
+generated with default values.
+
+KNOWN BUGS:
 * when you are generating logs, and you press 'Stop' button.
   A popup window let you know you should wait for the logger to
   finish stopping. Under FSO M5, if you press the power
