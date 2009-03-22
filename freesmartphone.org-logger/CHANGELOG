@@ -1,0 +1,11 @@
+Version 0.2.0
+* do not log if in a call
+* GUI added before upload to enter login/password
+* requests CPU ressource to prevent from going into suspend (depends on
+the settings of the phone)
+* GUI added after upload, for deleting processed logs
+* Reads GSM data at startup, no need to wait for a Network update signal
+* code for logging neighbour cells added (but deactivated for this release)
+
+Version 0.1
+Initial version.
