@@ -1,8 +1,11 @@
 openBmap logger version 0.2.0
 
 SUMMARY:
+OpenBmap is a free and open map of wireless communicating objects
+(e.g. cellular antenna, Wi-Fi, Bluetooth). It provides tools to
+mutualize data, create and access this map. 
 The purpose of this software is to log GSM data, together with
-GPS coordinate. This data are sent to a website (www.openbmap.org),
+GPS coordinate. This data are sent to the website (www.openbmap.org),
 in order to build a free database. In order to keep a high quality
 of data, we store GPS quality, speed, GSM signal strength, etc...
 Possible use of this database:
@@ -17,7 +20,7 @@ on GSM data
 * get a map of 2, 2.5, 3G coverage (not yet implemented)
 * ...
 
-What's new since 0.1?
+WHAT'S NEW SINCE 0.1?
 * The complete process is now done through graphical interface!
 * Neighbour cells logging code is present, but deactivated. The
 reasons are:
@@ -78,7 +81,7 @@ website, and fill a correct login/password in the popup window
 displayed before upload works.
 
 * A button to exit (if logger is active, it will first stop it
-cleanly, and then exits).
+cleanly, and then exit).
 
 Config file and application log are located under HOME/.openBmap
 directory by default.
