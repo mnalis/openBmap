@@ -60,6 +60,11 @@ class Gsm:
                                           'org.freesmartphone.GSM.Network',
                                           'org.freesmartphone.ogsmd',
                                           '/org/freesmartphone/GSM/Device')
+            bus.add_signal_receiver(self.signal_strength_handler,
+                                          'SignalStrength',
+                                          'org.freesmartphone.GSM.Network',
+                                          'org.freesmartphone.ogsmd',
+                                          '/org/freesmartphone/GSM/Device')
             bus.add_signal_receiver(self.call_status_handler,
                                           'CallStatus',
                                           'org.freesmartphone.GSM.Call',
@@ -113,6 +118,8 @@ class Gsm:
         """Handler for org.freesmartphone.GSM.Network.Status signal.
         
         MCC, MNC, lac, cid and signal strengh are received asynchronuously through this signal/handler.
+        Warning: we do not receive this signal when only the signal strength changes, see
+        org.freesmartphone.GSM.Network.SignalStrength signal, and self.signal_strength_handler().
         """
         logging.debug("Wait for updating GSM data.")
         self.acquire_lock()
@@ -160,6 +167,30 @@ class Gsm:
             logging.warning(str(e))
         self.release_lock()
         logging.debug("GSM data updated, lock released.")
+        self.notify_observers()
+
+    def signal_strength_handler(self, data, *args, **kwargs):
+        """Handler for org.freesmartphone.GSM.Network.SignalStrength signal.
+        """
+        logging.debug("Wait for updating GSM signal strength.")
+        self.acquire_lock()
+        logging.debug("Lock acquired, updating GSM signal strength.")
+        try:
+            new_dbm = self.signal_percent_to_dbm(data)
+            if self.check_GSM():
+                logging.info('GSM Signal strength updated from %i dBm to %i dBm (%i %%)' %
+                             (self._strength,
+                              new_dbm,
+                              data))
+                self._strength = new_dbm
+            else:
+                logging.info('GSM data invalid, no signal strength update to %i dBm (%i %%)' %
+                             (new_dbm, data))
+        except Exception, e:
+            logging.warning('Unable to update GSM signal strength.')
+            logging.warning(str(e))
+        self.release_lock()
+        logging.debug("GSM signal strength update finished, lock released.")
         self.notify_observers()
 
     def empty_GSM_data(self):
