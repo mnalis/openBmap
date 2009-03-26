@@ -361,7 +361,8 @@ class Config:
     CONFIGURATION_FILENAME = os.path.join(APP_HOME_DIR,
                                      'openBmap.conf')
     XML_LOG_VERSION = 'V2'
-    SOFTWARE_VERSION = 'FSO 0.2.0'
+    # For ease of comparison in database, we use ##.##.## format for version:
+    SOFTWARE_VERSION = '00.02.00'
     
     def __init__(self):        
         # strings which will be used in the configuration file
@@ -621,11 +622,8 @@ class ObmLogger():
             filename = os.path.join(logDir, 'log' + date + '.xml')
             # if the file does not exist, we start it with the "header"
             logmsg = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + \
-            "<logfile manufacturer=\"%s\" model=\"%s\" revision=\"%s\">\n" \
-            % self._gsm.get_device_info()
-            # revert to previous log format, for release 0.2.0
-            #"<logfile manufacturer=\"%s\" model=\"%s\" revision=\"%s\" software=\"%s\">\n" \
-            #% ( self._gsm.get_device_info() + (config.SOFTWARE_VERSION,) )
+            "<logfile manufacturer=\"%s\" model=\"%s\" revision=\"%s\" swid=\"FSOnen1\" swver=\"%s\">\n" \
+            % ( self._gsm.get_device_info() + (config.SOFTWARE_VERSION,) )
             for log in self._logsInMemory:
                 logmsg += log
         #TODO: escaped characters wich would lead to malformed XML document (e.g. '"')
