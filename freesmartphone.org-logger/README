@@ -52,6 +52,11 @@ to cancel upload).
 MANUAL:
 Interface is straightforward.
 
+Note: The GPS is started as soon as the application is launched.
+And it keeps running if the application is logging or not. This
+is to prevent losing the GPS position if you pause your logging.
+You have to exit the application in order to stop the GPS.
+
 * A button to start generating logs. Values will be displayed when
 valid. Logs are stored under HOME/.openBmap/Logs by default.
 
