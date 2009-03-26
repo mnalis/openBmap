@@ -1,4 +1,5 @@
 Version 0.2.0
+* Software id and version added in generated logs
 * do not log if in a call
 * GUI added before upload to enter login/password
 * requests CPU ressource to prevent from going into suspend (depends on

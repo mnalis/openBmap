@@ -38,6 +38,7 @@ depends on the configuration of the phone...).
    returns a lower signal strength.
  - org.freesmartphone.GSM.Monitor.GetNeighbourCellInformation()
    returns garbage when in a call.
+* Software id and version added in generated logs
 
 What you should expect:
 * The complete process is done through graphical interface.
