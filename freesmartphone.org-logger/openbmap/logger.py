@@ -225,7 +225,7 @@ class Gsm:
         """Returns True if valid GSM data is available."""
         # if something went wrong with GSM data then strength will be set to 0 (see empty_GSM_data() )
         # see 3GPP documentation TS 07.07 Chapter 8.5, GSM 07.07 command +CSQ
-        return (self._strength >= -113 and self._strength <= -53)
+        return (self._strength >= -113 and self._strength <= -51)
     
     def signal_percent_to_dbm(self, val):
         """Translate the signal percent value to dbm."""
@@ -362,7 +362,7 @@ class Config:
                                      'openBmap.conf')
     XML_LOG_VERSION = 'V2'
     # For ease of comparison in database, we use ##.##.## format for version:
-    SOFTWARE_VERSION = '00.02.00'
+    SOFTWARE_VERSION = '00.02.01'
     
     def __init__(self):        
         # strings which will be used in the configuration file

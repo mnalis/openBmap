@@ -1,3 +1,7 @@
+
+Version 0.2.1
+Bug fix: when signal strength 100, GSM data incorrectly tagged as 'invalid'
+
 Version 0.2.0
 * Software id and version added in generated logs
 * do not log if in a call
