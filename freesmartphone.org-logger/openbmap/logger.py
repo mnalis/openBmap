@@ -627,7 +627,6 @@ class ObmLogger():
             for log in self._logsInMemory:
                 logmsg += log
         #TODO: escaped characters wich would lead to malformed XML document (e.g. '"')
-        # TODO: manage the closing logfile mark at the end of the file        
             logmsg += '</logfile>'
             logging.debug('Logs: %s' % logmsg)
             try:
