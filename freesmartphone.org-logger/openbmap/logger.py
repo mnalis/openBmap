@@ -375,7 +375,11 @@ class Config:
         self.SCAN_SPEED_DEFAULT = 'OpenBmap logger default scanning speed (in sec.)'
         self.MIN_SPEED_FOR_LOGGING = 'GPS minimal speed for logging (km/h)'
         self.MAX_SPEED_FOR_LOGGING = 'GPS maximal speed for logging (km/h)'
+        # NB_OF_LOGS_PER_FILE is considered for writing of log to disk only if MAX_LOGS_FILE_SIZE <= 0
         self.NB_OF_LOGS_PER_FILE = 'Number of logs per file'
+        # puts sth <=0 to MAX_LOGS_FILE_SIZE to ignore it and let other conditions trigger
+        # the write of the log to disk (e.g. NB_OF_LOGS_PER_FILE)
+        self.MAX_LOGS_FILE_SIZE = 'Maximal size of log files to be uploaded (kB)'
         
         self.CREDENTIALS = 'Credentials'
         self.OBM_LOGIN = 'OpenBmap login'
@@ -417,6 +421,7 @@ class Config:
                 config.set(self.GENERAL, self.MIN_SPEED_FOR_LOGGING, 0)
                 config.set(self.GENERAL, self.MAX_SPEED_FOR_LOGGING, 150)
                 config.set(self.GENERAL, self.NB_OF_LOGS_PER_FILE, 3)
+                config.set(self.GENERAL, self.MAX_LOGS_FILE_SIZE, 20)
                 
                 config.add_section(self.CREDENTIALS)
                 config.set(self.CREDENTIALS, self.OBM_LOGIN, 'your_login')
@@ -429,15 +434,28 @@ class Config:
             if option in [self.SCAN_SPEED_DEFAULT,
                           self.MIN_SPEED_FOR_LOGGING,
                           self.MAX_SPEED_FOR_LOGGING,
-                          self.NB_OF_LOGS_PER_FILE]:
+                          self.NB_OF_LOGS_PER_FILE,
+                          self.MAX_LOGS_FILE_SIZE]:
                 return self._config.getint(section, option)
             else:
                 return self._config.get(section, option)
         except Exception, e:
-            logging.critical("get_option() does not find (%s / %s). This is much probably a bug." % (section, option))
-            logging.critical(str(e))
-            #TODO: well in case this happens, this should be forwarded to Views (GUI) in order to inform the user
-            sys.exit(-1)
+            # we cannot find it. Maybe the current config file (old version) did not contain
+            # this entry (newer version of the software)
+            defaultValue = 0
+            if option in [self.MAX_LOGS_FILE_SIZE]:
+                defaultValue = 20
+            else:
+                logging.critical("get_option() does not find (%s / %s). This is much probably a bug." % (section, option))
+                logging.critical(str(e))
+                #TODO: well in case this happens, this should be forwarded to Views (GUI) in order to inform the user
+                sys.exit(-1)
+            self._config.set(self.GENERAL, option, defaultValue)
+            logging.info('Option \'%s\' cannot be found. Add it to the config file with default value: %i'
+                         % (option, defaultValue))
+            self.save_config()
+            return defaultValue
+
     def set(self, section, option, value):
         self._config.set(section, option, value)
         
@@ -531,6 +549,12 @@ class ObmLogger():
         self._loggerLock = threading.Lock()
         # we will store every log in this list, until writing it to a file:
         self._logsInMemory = []
+        # _logsInMemory is a list of strings, which will be concatenated to write to disk
+        self._logsInMemoryLengthInByte = 0
+        self._logFileHeader = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + \
+        "<logfile manufacturer=\"%s\" model=\"%s\" revision=\"%s\" swid=\"FSOnen1\" swver=\"%s\">\n" \
+        % ( self._gsm.get_device_info() + (config.SOFTWARE_VERSION,) )
+        self._logFileTail = '</logfile>'
         
         # DEBUG = True if you want to activate GPS/Web connection simulation
         self.DEBUG = False
@@ -553,7 +577,7 @@ class ObmLogger():
         self.write_obm_log(str(datetime.now()), 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
     
     def write_obm_log(self, date, tstamp, servingCell, lng, lat, alt, spe, heading, hdop, vdop, pdop, neighbourCells):
-        """Write the OpenBMap log file."""
+        """Format and stores in memory given data, possibly triggers writing in log file."""
         # From Python doc: %f -> The precision determines the number of digits after the decimal point and defaults to 6.
         # A difference of the sixth digit in lat/long leads to a difference of under a meter of precision.
         # Maximum error by rounding is 5. GPS precision is at best 10m. 2 x (maxError x error) = 2 x (5 x 1)
@@ -610,34 +634,76 @@ class ObmLogger():
             self.fileToSendLock.release()
             logging.info('OpenBmap log file lock released.')
             return
-        self._logsInMemory.append(logmsg)
-        if len(self._logsInMemory) < config.get(config.GENERAL, config.NB_OF_LOGS_PER_FILE):
-            logging.debug('Max logs per file not reached, wait to write to a file.')
-        else:
-            logDir = config.get(config.GENERAL, config.OBM_LOGS_DIR_NAME)
+
+        maxLogsFileSize = config.get(config.GENERAL, config.MAX_LOGS_FILE_SIZE) * 1024
+
+        if ( maxLogsFileSize > 0 ):
+            # we use the max log file size as criterium to trigger write of file
             
-            # at the moment: log files follow: logYYYYMMDDhhmmss.xml
-            # revert to previous log format, for release 0.2.0
-            #filename = os.path.join(logDir, config.XML_LOG_VERSION + '_log' + date + '.xml')
-            filename = os.path.join(logDir, 'log' + date + '.xml')
-            # if the file does not exist, we start it with the "header"
-            logmsg = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + \
-            "<logfile manufacturer=\"%s\" model=\"%s\" revision=\"%s\" swid=\"FSOnen1\" swver=\"%s\">\n" \
-            % ( self._gsm.get_device_info() + (config.SOFTWARE_VERSION,) )
-            for log in self._logsInMemory:
-                logmsg += log
-        #TODO: escaped characters wich would lead to malformed XML document (e.g. '"')
-            logmsg += '</logfile>'
-            logging.debug('Logs: %s' % logmsg)
-            try:
-                file = open(filename, 'w')
-                file.write(logmsg)
-                file.close()
-                self._logsInMemory[:] = []
-            except Exception, e:
-                logging.error("Error while writing GSM/GPS log to file: %s" % str(e))
+            # we write ascii file, that is to say, one byte per character
+            fileLengthInByte = len(self._logFileHeader) + len(logmsg) \
+            + self._logsInMemoryLengthInByte + len(self._logFileTail)
+
+            if (fileLengthInByte <= maxLogsFileSize):
+                logging.debug('Current size of logs in memory %i bytes, max size of log files is %i bytes.'
+                              % (fileLengthInByte, maxLogsFileSize))
+            else:
+                self.write_obm_log_to_disk_unprotected()
+            self._logsInMemory.append(logmsg)
+            self._logsInMemoryLengthInByte += len(logmsg)
+        else:
+            self._logsInMemory.append(logmsg)
+            self._logsInMemoryLengthInByte += len(logmsg)
+            if len(self._logsInMemory) < config.get(config.GENERAL, config.NB_OF_LOGS_PER_FILE):
+                logging.debug('Max logs per file (%i/%i) not reached, wait to write to a file.'
+                              % (len(self._logsInMemory), config.get(config.GENERAL, config.NB_OF_LOGS_PER_FILE)))
+            else:
+                self.write_obm_log_to_disk_unprotected()
+
         self.fileToSendLock.release()
         logging.info('OpenBmap log file lock released.')
+
+    def write_obm_log_to_disk(self):
+        """Gets the Lock and then calls write_obm_log_to_disk_unprotected()."""
+        self.fileToSendLock.acquire()
+        logging.info('OpenBmap log file lock acquired by write_obm_log_to_disk().')
+        self.write_obm_log_to_disk_unprotected()
+        self.fileToSendLock.release()
+        logging.info('OpenBmap log file lock released by write_obm_log_to_disk().')
+
+    def write_obm_log_to_disk_unprotected(self):
+        """Takes the logs already formatted in memory and write them to disk. Clears the log in memory.
+
+        Warning: this method is not protected by a Lock!
+        """
+
+        if len(self._logsInMemory) == 0:
+            logging.debug('No log to write to disk, returning.')
+            return
+
+        now = datetime.now()
+        #"yyyyMMddHHmmss"
+        date = now.strftime("%Y%m%d%H%M%S")
+
+        logDir = config.get(config.GENERAL, config.OBM_LOGS_DIR_NAME)
+        # at the moment: log files follow: logYYYYMMDDhhmmss.xml
+        # revert to previous log format, for release 0.2.0
+        #filename = os.path.join(logDir, config.XML_LOG_VERSION + '_log' + date + '.xml')
+        filename = os.path.join(logDir, 'log' + date + '.xml')
+        logmsg = self._logFileHeader
+        for log in self._logsInMemory:
+            logmsg += log
+        #TODO: escaped characters wich would lead to malformed XML document (e.g. '"')
+        logmsg += self._logFileTail
+        logging.debug('Write logs to file: %s' % logmsg)
+        try:
+            file = open(filename, 'w')
+            file.write(logmsg)
+            file.close()
+            self._logsInMemory[:] = []
+            self._logsInMemoryLengthInByte = 0
+        except Exception, e:
+            logging.error("Error while writing GSM/GPS log to file: %s" % str(e))
         
     def send_logs(self):
         """Try uploading available log files to OBM database.
@@ -762,6 +828,12 @@ class ObmLogger():
         
         # check if we have no ongoing call...
         self._gsm.call_status_handler(None)
+
+    def exit_openBmap(self):
+        """Puts the logger in a nice state for exiting the application.
+
+        * Saves logs in memory if any."""
+        self.write_obm_log_to_disk()
 
     def log(self):
         logging.debug("OpenBmap logger runs.")

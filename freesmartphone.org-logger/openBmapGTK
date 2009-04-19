@@ -94,6 +94,7 @@ class openBmapGTK:
             # to keep being called by timeout_add
             return True
         else:
+            self._obmlogger.exit_openBmap()
             logging.debug('Exiting...')
             gobject.idle_add(gtk.main_quit, )
         
