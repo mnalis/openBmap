@@ -561,7 +561,7 @@ class ObmLogger():
         self.DEBUG = False
         if self.DEBUG:
             self.get_gps_data = self.simulate_gps_data
-            self.get_gsm_data = self.simulate_gsm_data
+            #self.get_gsm_data = self.simulate_gsm_data
 
     def request_ressource(self, resource):
         """Requests the given string resource through /org/freesmartphone/Usage."""
