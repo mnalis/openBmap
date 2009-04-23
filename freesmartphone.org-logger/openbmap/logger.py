@@ -689,7 +689,12 @@ class ObmLogger():
         # at the moment: log files follow: logYYYYMMDDhhmmss.xml
         # log format, for release 0.2.0
         # filename = os.path.join(logDir, 'log' + date + '.xml')
-        filename = os.path.join(logDir, config.XML_LOG_VERSION + '_log' + date + '.xml')
+        # new filename format VX_MCC_logYYYYMMDDhhmmss.xml
+        mcc = self._logsInMemory[0]
+        # len('mcc="') = 5
+        mcc = mcc[mcc.find("mcc=") + 5 : ]
+        mcc = mcc[ : mcc.find('"')]
+        filename = os.path.join(logDir, config.XML_LOG_VERSION + '_' + mcc + '_log' + date + '.xml')
         logmsg = self._logFileHeader
         for log in self._logsInMemory:
             logmsg += log
