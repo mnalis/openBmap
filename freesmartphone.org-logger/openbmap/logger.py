@@ -320,8 +320,9 @@ class Gsm:
                      (valid, mcc, mnc, lac, cid, strength))
         neighbourCells = ()
         # this is deactivated for release 0.2.0
-        #if valid: 
-        #    neighbourCells = self.get_neighbour_cell_info()
+        # and re-activated for release 0.3.0
+        if valid: 
+            neighbourCells = self.get_neighbour_cell_info()
             
         self.release_lock()
         logging.debug("GSM data read, lock released.")
@@ -596,16 +597,17 @@ class ObmLogger():
         hvpdopPrecision = 2
         # heading in decimal degrees
         headingPrecision = 9
-        # revert to previous log format, for release 0.2.0
-        #"<gsm mcc=\"%s\" mnc=\"%s\" lac=\"%s\" id=\"%s\" ss=\"%i\" serving=\"1\" act=\"%s\" />" % servingCell
+        # log format, for release 0.2.0
+        # "<gsm mcc=\"%s\" mnc=\"%s\" lac=\"%s\" id=\"%s\" ss=\"%i\"/>" % servingCell[:5]
         logmsg = "<scan time=\"%s\">" % time.strftime('%Y%m%d%H%M%S', time.gmtime(tstamp)) + \
-        "<gsm mcc=\"%s\" mnc=\"%s\" lac=\"%s\" id=\"%s\" ss=\"%i\"/>" % servingCell[:5]
+        "<gsmserving mcc=\"%s\" mnc=\"%s\" lac=\"%s\" id=\"%s\" ss=\"%i\" act=\"%s\" />" % servingCell
         
         for cell in neighbourCells:
-            logmsg += "<gsm mcc=\"%s\" mnc=\"%s\" lac=\"%s\"" % (servingCell[:2] + (cell['lac'],)) +\
+            # the best answer we could get was: it is highly probable that the neighbour cells have
+            # the same MCC and MNC as the serving one, but this is not absolutely sure.
+            logmsg += "<gsmneighbour mcc=\"%s\" mnc=\"%s\" lac=\"%s\"" % (servingCell[:2] + (cell['lac'],)) +\
             " id=\"%s\"" % cell['cid'] + \
-            " ss=\"%i\"" % cell['rxlev'] + \
-            " serving=\"0\"" + \
+            " rxlev=\"%i\"" % cell['rxlev'] + \
             " c1=\"%i\"" % cell['c1'] + \
             " c2=\"%i\"" % cell['c2'] + \
             " ctype=\"%s\"" % cell['ctype'] + \
