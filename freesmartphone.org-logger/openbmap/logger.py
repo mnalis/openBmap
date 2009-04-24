@@ -281,11 +281,7 @@ class Gsm:
                         # The best answer I could get was: no idea if this is correct.
                         # Thus we keep the values as unmodified as possible.
                     if 'rxlev' in cell:
-                        #logging.debug('Neighbour cell rxlev is %s' % cell['rxlev'])
-                        if cell['rxlev'] == 0:
-                            raise Exception, 'GSM rxlev (0) not suitable.'
-                        else:
-                            result['rxlev'] = cell['rxlev']
+                        result['rxlev'] = cell['rxlev']
                     if 'c1' in cell:
                         result['c1'] = cell['c1']
                     if 'c2' in cell:
@@ -293,9 +289,15 @@ class Gsm:
                     if 'ctype' in cell:
                         result['ctype'] = ('NA', 'GSM', 'GPRS')[cell['ctype']]
                     #logging.debug( 'Neighbour cell result: %s' % result)
+                    
                     if int(result['cid']) == 0:
                         # I have seen cid of 0. This does not make sense?
                         logging.info('Neighbour cell with cell id of 0 discarded.')
+                    elif int(result['lac']) == 0:
+                        # Not sure if I have seen lac of 0. This does not make sense? In case of...
+                        logging.info('Neighbour cell with lac of 0 discarded.')
+                    elif ('rxlev' in cell) and (cell['rxlev'] == 0):
+                            logging.info('GSM rxlev (0) not suitable, this neighbour cell is discarded.')
                     else:
                         results.append(result)
         except Exception, e:
