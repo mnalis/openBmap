@@ -274,19 +274,25 @@ class Gsm:
                         #    return 0
                         #else:
                         #    return int( round( math.log( signal ) / math.log( 31 ) * 100 ) )
+                        
+                        # http://wiki.openmoko.org/wiki/Neo_1973_and_Neo_FreeRunner_gsm_modem#Serving_Cell_Information_.282.2C1.29
+                        # states:
+                        # rxlev      Received Field Strength      (rxlev/2)+2 gives the AT+CSQ response value 
+                        # The best answer I could get was: no idea if this is correct.
+                        # Thus we keep the values as unmodified as possible.
                     if 'rxlev' in cell:
-                        logging.debug('Neighbour cell rxlev is %s' % cell['rxlev'])
+                        #logging.debug('Neighbour cell rxlev is %s' % cell['rxlev'])
                         if cell['rxlev'] == 0:
-                            raise Exception, 'GSM strength (0) not suitable.'
+                            raise Exception, 'GSM rxlev (0) not suitable.'
                         else:
-                            result['rxlev'] = self.signal_percent_to_dbm( cell['rxlev'] )
+                            result['rxlev'] = cell['rxlev']
                     if 'c1' in cell:
-                        result['c1'] = self.signal_percent_to_dbm( cell['c1'] )
+                        result['c1'] = cell['c1']
                     if 'c2' in cell:
-                        result['c2'] = self.signal_percent_to_dbm( cell['c2'] )
+                        result['c2'] = cell['c2']
                     if 'ctype' in cell:
                         result['ctype'] = ('NA', 'GSM', 'GPRS')[cell['ctype']]
-                    logging.debug( 'Neighbour cell result: %s' % result)
+                    #logging.debug( 'Neighbour cell result: %s' % result)
                     if int(result['cid']) == 0:
                         # I have seen cid of 0. This does not make sense?
                         logging.info('Neighbour cell with cell id of 0 discarded.')
