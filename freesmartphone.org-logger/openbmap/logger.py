@@ -286,8 +286,8 @@ class Gsm:
                         result['c1'] = cell['c1']
                     if 'c2' in cell:
                         result['c2'] = cell['c2']
-                    if 'ctype' in cell:
-                        result['ctype'] = ('NA', 'GSM', 'GPRS')[cell['ctype']]
+                    #if 'ctype' in cell:
+                    #    result['ctype'] = ('NA', 'GSM', 'GPRS')[cell['ctype']]
                     #logging.debug( 'Neighbour cell result: %s' % result)
                     
                     if int(result['cid']) == 0:
@@ -618,8 +618,8 @@ class ObmLogger():
             " rxlev=\"%i\"" % cell['rxlev'] + \
             " c1=\"%i\"" % cell['c1'] + \
             " c2=\"%i\"" % cell['c2'] + \
-            " ctype=\"%s\"" % cell['ctype'] + \
             "/>"
+            #" ctype=\"%s\"" % cell['ctype'] + \
         
         logmsg += "<gps time=\"%s\"" % date + \
         " lng=\"%s\"" % ( ('%.*f' % (latLonPrecision, lng)).rstrip('0').rstrip('.') ) + \
