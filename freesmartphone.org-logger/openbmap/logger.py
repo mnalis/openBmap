@@ -607,7 +607,7 @@ class ObmLogger():
         headingPrecision = 9
         # log format, for release 0.2.0
         # "<gsm mcc=\"%s\" mnc=\"%s\" lac=\"%s\" id=\"%s\" ss=\"%i\"/>" % servingCell[:5]
-        logmsg = "<scan time=\"%s\">" % time.strftime('%Y%m%d%H%M%S', time.gmtime(tstamp)) + \
+        logmsg = "<scan time=\"%s\">" % date + \
         "<gsmserving mcc=\"%s\" mnc=\"%s\" lac=\"%s\" id=\"%s\" ss=\"%i\" act=\"%s\" />" % servingCell
         
         for cell in neighbourCells:
@@ -621,7 +621,7 @@ class ObmLogger():
             "/>"
             #" ctype=\"%s\"" % cell['ctype'] + \
         
-        logmsg += "<gps time=\"%s\"" % date + \
+        logmsg += "<gps time=\"%s\"" % time.strftime('%Y%m%d%H%M%S', time.gmtime(tstamp)) + \
         " lng=\"%s\"" % ( ('%.*f' % (latLonPrecision, lng)).rstrip('0').rstrip('.') ) + \
         " lat=\"%s\"" % ( ('%.*f' % (latLonPrecision, lat)).rstrip('0').rstrip('.') ) + \
         " alt=\"%s\"" % ( ('%.*f' % (altitudePrecision, alt)).rstrip('0').rstrip('.') ) + \
