@@ -122,6 +122,12 @@ class openBmapGTK:
             for w in [self._gpsPositionLabel, self._gpsAltitudeLabel, self._dops,
                        self._speed]:
                 w.set_text('N/A')
+                
+            # quick improvement for notifying the user that: the GPS is active, and what it is waiting
+            # for in order to display GPS data
+            self._gpsPositionLabel.set_text('GPS is on')
+            self._gpsAltitudeLabel.set_text('Waiting for a 3D fix')
+            
         isLogging = self._obmlogger.is_logging()
         self._startLogging.set_sensitive(not isLogging)
         self._stopLogging.set_sensitive(isLogging)
