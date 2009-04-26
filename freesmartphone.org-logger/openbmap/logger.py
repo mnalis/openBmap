@@ -555,6 +555,7 @@ class ObmLogger():
         self._bus = self.init_dbus()
         self._gsm = Gsm(self._bus)
         self._gsm.register(self)
+        self._mcc = ""
         self._loggerLock = threading.Lock()
         # we will store every log in this list, until writing it to a file:
         self._logsInMemory = []
@@ -965,12 +966,25 @@ class ObmLogger():
         
         
     def get_gsm_data(self):
-        """Return Fields validity boolean, MCC, MNC, lac, cid, signal strength, tuple of neighbour cells dictionaries.
+        """Returns Fields validity boolean, MCC, MNC, lac, cid, signal strength, tuple of neighbour cells dictionaries.
         
         Each neighbour cell dictionary contains lac and cid fields.
         They may contain rxlev, c1, c2, and ctype.
+        If MCC has changed, triggers writing of log file.
         """
-        return self._gsm.get_gsm_data()
+        
+        result = self._gsm.get_gsm_data()
+        currentMcc = result[1][0]
+        if currentMcc != self._mcc:
+            # as soon as we have changed from MCC (thus from country), we save the logs because
+            # for now the log files have the MCC in their name, to make easy to dispatch them.
+            # Thus, a log file is supposed to contain only one MCC related data.
+            logging.info("MCC has changed from '%s' to '%s'." % (self._mcc, currentMcc))
+            self.write_obm_log_to_disk()
+            self._mcc = currentMcc
+        else:
+            logging.debug("MCC unchanged (was '%s', is '%s')" % (self._mcc, currentMcc))
+        return result
         
     def get_gps_data(self):
         """Return validity boolean, time stamp, lat, lng, alt, pdop, hdop, vdop, speed in km/h, heading."""
