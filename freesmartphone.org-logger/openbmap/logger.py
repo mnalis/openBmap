@@ -609,7 +609,7 @@ class ObmLogger():
         # log format, for release 0.2.0
         # "<gsm mcc=\"%s\" mnc=\"%s\" lac=\"%s\" id=\"%s\" ss=\"%i\"/>" % servingCell[:5]
         logmsg = "<scan time=\"%s\">" % date + \
-        "<gsmserving mcc=\"%s\" mnc=\"%s\" lac=\"%s\" id=\"%s\" ss=\"%i\" act=\"%s\" />" % servingCell
+        "<gsmserving mcc=\"%s\" mnc=\"%s\" lac=\"%s\" id=\"%s\" ss=\"%i\" act=\"%s\"/>" % servingCell
         
         for cell in neighbourCells:
             # the best answer we could get was: it is highly probable that the neighbour cells have
