@@ -371,7 +371,7 @@ class Config:
                                      'openBmap.conf')
     XML_LOG_VERSION = 'V2'
     # For ease of comparison in database, we use ##.##.## format for version:
-    SOFTWARE_VERSION = '00.03.00beta'
+    SOFTWARE_VERSION = '00.03.00'
     
     def __init__(self):        
         # strings which will be used in the configuration file
