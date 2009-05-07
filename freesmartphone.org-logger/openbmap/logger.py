@@ -388,7 +388,7 @@ class Config:
         self.NB_OF_LOGS_PER_FILE = 'Number of logs per file'
         # puts sth <=0 to MAX_LOGS_FILE_SIZE to ignore it and let other conditions trigger
         # the write of the log to disk (e.g. NB_OF_LOGS_PER_FILE)
-        self.MAX_LOGS_FILE_SIZE = 'Maximal size of log files to be uploaded (kB)'
+        self.MAX_LOGS_FILE_SIZE = 'Maximal size of log files to be uploaded (kbytes)'
         
         self.CREDENTIALS = 'Credentials'
         self.OBM_LOGIN = 'OpenBmap login'
