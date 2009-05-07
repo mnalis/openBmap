@@ -1,14 +1,17 @@
-openBmap logger version 0.2.1
+openBmap logger version 0.3.0
 
 SUMMARY:
+========
 OpenBmap is a free and open map of wireless communicating objects
 (e.g. cellular antenna, Wi-Fi, Bluetooth). It provides tools to
 mutualize data, create and access this map. 
 The purpose of this software is to log GSM data, together with
 GPS coordinate. This data are sent to the website (www.openbmap.org),
 in order to build a free database. In order to keep a high quality
-of data, we store GPS quality, speed, GSM signal strength, etc...
-Possible use of this database:
+of data, we store GPS quality, speed, GSM signal strength, etc... This
+is what makes us different from other similar projects: focus on quality.
+
+Possible uses of this database:
 * get your location based on the current GSM cell you are connected to.
 (GPS needs extra power to function, GSM is always on. Less precise
 than GPS, but enough for a lot of usages. Instant location, GPS
@@ -20,7 +23,22 @@ on GSM data
 * get a map of 2, 2.5, 3G coverage (not yet implemented)
 * ...
 
+WHAT'S NEW SINCE 0.2.1?
+=======================
+* Neighbour cells log activated.
+* Log files are now much bigger, you should have less files to upload.
+* If logs in memory when exiting, they will be written to disk.
+* Ignore neighbour cell if lac, cid or rxlev is 0.
+* GUI now says: GPS is active, and waiting for 3D fix.
+* Fix: GPS time in log is now based on GPS data.
+Was using the locale time of the phone.
+* When MCC changes, write logs to file.
+This means, a log file, only contains data related to a same MCC,
+that is to say, to one country.
+* Details in CHANGELOG.
+
 WHAT'S NEW SINCE 0.1?
+=====================
 * The complete process is now done through graphical interface!
 * Neighbour cells logging code is present, but deactivated. The
 reasons are:
@@ -40,17 +58,20 @@ depends on the configuration of the phone...).
    returns garbage when in a call.
 * Software id and version added in generated logs
 
-What you should expect:
+WHAT YOU SHOULD EXPECT:
+=======================
 * The complete process is done through graphical interface.
 * Requests CPU ressource to prevent phone from going to suspend (this
 depends on the configuration of the phone...).
-* generation of logs (no log during a call)
+* generation of logs (no log during a call).
+* logs serving and neighbour cells.
 * Graphical window to enter login/password before upload (possibility
 to cancel upload).
-* upload of logs
+* upload of logs.
 * Graphical window proposing to delete all logs already processed.
 
 MANUAL:
+=======
 Interface is straightforward.
 
 Note: The GPS is started as soon as the application is launched.
@@ -60,6 +81,7 @@ You have to exit the application in order to stop the GPS.
 
 * A button to start generating logs. Values will be displayed when
 valid. Logs are stored under HOME/.openBmap/Logs by default.
+GPS data is considered valid only when we have a 3D fix.
 
 * A button to stop generating logs.
 
@@ -105,12 +127,15 @@ gps maximal speed for logging (km/h) = 150
 - please do not modify other values, this could prevent the
 logger from working correctly.
 
+TROUBLESHOOTING:
+================
 If you break your configuration file, just exit the application.
 Delete the configuration file (by default: HOME/.openBmap/openBmap.conf).
 Launch the application. The configuration file, if not found is
 generated with default values.
 
 KNOWN BUGS:
+===========
 * when you are generating logs, and you press 'Stop' button.
   A popup window let you know you should wait for the logger to
   finish stopping. Under FSO M5, if you press the power

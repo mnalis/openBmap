@@ -1,4 +1,21 @@
 
+Version 0.3.0
+* Now you can trigger writing logs to a file based on a maximal
+size specified in config file.
+* If logs in memory when exiting, they will be written to disk.
+* Log file name now starts with XML log version.
+* Added MCC in log file name.
+* Neighbour cells log re-activated.
+* Ignore neighbour cell if lac, cid or rxlev is 0.
+* GUI now says: GPS is active, and waiting for 3D fix.
+* Fix: GPS time in log is now based on GPS data.
+Was using the locale time of the phone.
+* When MCC changes, write logs to file.
+This means, a log file, only contains data related to a same MCC,
+that is to say, to one country.
+* Removed ambiguity about unit in config file.
+kB (byte) was turned into kb (bit), because turned low case. Now uses kbytes.
+
 Version 0.2.1
 Bug fix: when signal strength 100, GSM data incorrectly tagged as 'invalid'
 
