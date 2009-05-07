@@ -255,7 +255,7 @@ class Gsm:
         try:
             data = self._gsmMonitoringIface.GetNeighbourCellInformation()
             for cell in data:
-                logging.debug( 'Raw data neighbour cell: %s' % cell)
+                #logging.debug( 'Raw data neighbour cell: %s' % cell)
                 if "lac" and "cid" in cell:
                     # lac and cid are hexadecimal strings
                     result = {}
