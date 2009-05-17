@@ -1,0 +1,5 @@
+include openBmap.desktop AUTHORS CHANGELOG
+include ExitButton.png GenerateButton.png StopButton.png UploadButton.png
+include Main.glade
+include gpl.txt lgpl.txt
+include openBmap-desktop.png
