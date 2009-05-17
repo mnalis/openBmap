@@ -245,6 +245,62 @@ class Gsm:
         # translate to dBm (see 3GPP documentation TS 07.07 Chapter 8.5, GSM 07.07 command +CSQ)
         return val_from_modem * 2 - 113
     
+    def get_serving_cell_information(self):
+        """Returns a dictionary with serving cell monitoring data.
+        
+        If available contains 'lac' and 'cid'. May contain 'rxlev' and 'tav'.
+        Otherwise returns an empty dictionary.
+        """
+        result = {}
+        try:
+            data = self._gsmMonitoringIface.GetServingCellInformation()
+            
+            # Debug
+            # string hex
+            #data['cid'] = '0'
+            # string hex
+            #data['lac'] = '0'
+            # int
+            #data['rxlev'] = 0
+            #del data['lac']
+            #del data['cid']
+            # end of debug
+            
+            logging.debug( 'Raw data serving cell: %s' % data)
+            
+            if 'cid' in data and int(data['cid'], 16) == 0:
+                # I have seen cid of 0. This does not make sense?
+                logging.info('Serving cell with cell id of 0 discarded.')
+            elif 'lac' in data and int(data['lac'], 16) == 0:
+                # Not sure if I have seen lac of 0. This does not make sense? In case of...
+                logging.info('Serving cell with lac of 0 discarded.')
+            elif ('rxlev' in data) and (data['rxlev'] == 0):
+                    logging.info('GSM rxlev (0) not suitable, this serving cell is discarded.')
+            else:
+                # wiki.openmoko.org/wiki/Neo_1973_and_Neo_FreeRunner_gsm_modem#Serving_Cell_Information_.282.2C1.29
+                # states:
+                # rxlev      Received Field Strength      (rxlev/2)+2 gives the AT+CSQ response value 
+                # The best answer I could get was: no idea if this is correct.
+                # Thus we keep the values as unmodified as possible.
+                for key in ['rxlev', 'tav']:
+                    if key in data:
+                        result[key] = data[key]
+
+                if "lac" in data and "cid" in data:
+                    # lac and cid are hexadecimal strings
+                    result['lac'] = str(int(data["lac"], 16))
+                    result['cid'] = str(int(data["cid"], 16))
+                else:
+                    logging.debug('Either lac or cid is missing in serving cell information.')
+                    result.clear()
+
+        except Exception, e:
+            logging.error('get serving cell info: %s' % str(e))
+            result.clear()
+
+        logging.debug( 'serving cell result: %s' % result)
+        return result
+
     def get_neighbour_cell_info(self):
         """Returns a tuple of dictionaries, one for each cell.
         
@@ -331,6 +387,8 @@ class Gsm:
         # and re-activated for release 0.3.0
         if valid: 
             neighbourCells = self.get_neighbour_cell_info()
+            
+        self.get_serving_cell_information()
             
         self.release_lock()
         logging.debug("GSM data read, lock released.")
