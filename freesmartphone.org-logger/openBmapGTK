@@ -107,7 +107,7 @@ class openBmapGTK:
         (valid, servingCell, neighbourCells) = self._obmlogger.get_gsm_data()
         if valid:
             self._gsmLabel.set_text("%s / %s / %s" % servingCell[:3])
-            self._gsmLabel2.set_text("%s / %s / %s" % servingCell[3:])
+            self._gsmLabel2.set_text("%s / %s / %s" % servingCell[3:6])
         else:
             for w in [self._gsmLabel, self._gsmLabel2]:
                 w.set_text("N/A")

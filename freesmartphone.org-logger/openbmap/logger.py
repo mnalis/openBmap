@@ -362,11 +362,15 @@ class Gsm:
         return tuple(results)
         
     def get_gsm_data(self):
-        """Return validity boolean, MCC, MNC, lac, cid, signal strength, tuple of neighbour cells dictionaries.
+        """Return validity boolean, tuple serving cell data, tuple of neighbour cells dictionaries.
         
         Operation is atomic, values cannot be modified while reading it.
         The validity boolean is True when all fields are valid and consistent,
         False otherwise.
+        
+        Serving cell tuple contains: MCC, MNC, lac, cid, signal strength, access type, timing advance, rxlev.
+        Timing advance and rxlev may be emtpy.
+        
         Each neighbour cell dictionary contains lac and cid fields.
         They may contain rxlev, c1, c2, and ctype.
         """
@@ -380,19 +384,33 @@ class Gsm:
                                                       self._cid,
                                                       self._strength,
                                                       self._networkAccessType)
-        logging.info("valid=%s, MCC=%s, MNC=%s, lac=%s, cid=%s, strength=%s" %
-                     (valid, mcc, mnc, lac, cid, strength))
         neighbourCells = ()
+        tav = ''
+        rxlev = ''
         # this is deactivated for release 0.2.0
         # and re-activated for release 0.3.0
         if valid: 
             neighbourCells = self.get_neighbour_cell_info()
+            servingInfo = self.get_serving_cell_information()
+            # in case of a change in registration not already taken into account here
+            # by processing D-Bus signal by network_status_handler(), we prefer using data
+            # from get_serving_cell_information()
+            lac = servingInfo['lac']
+            cid = servingInfo['cid']
             
-        self.get_serving_cell_information()
-            
+            # deactivated. Timing advance only works for the serving cell, and when a channel is actually open
+            #if 'tav' in servingInfo:
+            #    tav = str(servingInfo['tav'])
+                
+            if 'rxlev' in servingInfo:
+                rxlev = str(servingInfo['rxlev'])
+        
+        logging.info("valid=%s, MCC=%s, MNC=%s, lac=%s, cid=%s, strength=%s, act=%s, tav=%s, rxlev=%s" %
+             (valid, mcc, mnc, lac, cid, strength, act, tav, rxlev))
+                
         self.release_lock()
         logging.debug("GSM data read, lock released.")
-        return (valid, (mcc, mnc, lac, cid, strength, act), neighbourCells )
+        return (valid, (mcc, mnc, lac, cid, strength, act, tav, rxlev), neighbourCells )
     
     def get_status(self):
         """Get GSM status.
@@ -667,7 +685,17 @@ class ObmLogger():
         # log format, for release 0.2.0
         # "<gsm mcc=\"%s\" mnc=\"%s\" lac=\"%s\" id=\"%s\" ss=\"%i\"/>" % servingCell[:5]
         logmsg = "<scan time=\"%s\">" % date + \
-        "<gsmserving mcc=\"%s\" mnc=\"%s\" lac=\"%s\" id=\"%s\" ss=\"%i\" act=\"%s\"/>" % servingCell
+        "<gsmserving mcc=\"%s\" mnc=\"%s\" lac=\"%s\" id=\"%s\" ss=\"%i\" act=\"%s\"" % servingCell[:6]
+        if servingCell[6] != "":
+            logmsg += " tav=\"%s\"" % servingCell[6]
+        else:
+            logging.debug("No timing advance available for serving cell, skip it.")
+        if servingCell[7] != "":
+            logmsg += " rxlev=\"%s\"" % servingCell[7]
+        else:
+            logging.debug("No rxlev available for serving cell, skip it.")
+        logmsg += "/>"
+         
         
         for cell in neighbourCells:
             # the best answer we could get was: it is highly probable that the neighbour cells have
@@ -960,7 +988,7 @@ class ObmLogger():
                                    neighbourCells)
             else:
                 logging.info('Data were not valid for creating openBmap log.')
-                logging.debug("Validity=%s, MCC=%s, MNC=%s, lac=%s, cid=%s, strength=%i, act=%s"
+                logging.debug("Validity=%s, MCC=%s, MNC=%s, lac=%s, cid=%s, strength=%i, act=%s, tav=%s, rxlev=%s"
                               % ((validGsm,) + servingCell) )
                 logging.debug("Validity=%s, lng=%f, lat=%f, alt=%f, spe=%f, hdop=%f, vdop=%f, pdop=%f" \
                               % (validGps, lng, lat, alt, spe, hdop, vdop, pdop))
