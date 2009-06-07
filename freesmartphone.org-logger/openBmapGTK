@@ -55,6 +55,30 @@ class openBmapGTK:
         self._stopLogging = self.wTree.get_widget('buttonStopLogging')
         self._startLogging = self.wTree.get_widget('buttonGenerateLog')
         
+        self._mccLabel = self.wTree.get_widget('labelMCCValue')
+        self._mncLabel = self.wTree.get_widget('labelMNCValue')
+        self._lacLabel = self.wTree.get_widget('labelLACValue')
+        self._cidLabel = self.wTree.get_widget('labelCIDValue')
+        self._ssLabel = self.wTree.get_widget('labelCellSignalStrengthValue')
+        self._actType = self.wTree.get_widget('labelAccessTypeValue')
+        self._gsmServingLabelList = [self._mccLabel,
+                                     self._mncLabel,
+                                     self._lacLabel,
+                                     self._cidLabel,
+                                     self._ssLabel,
+                                     self._actType]
+        
+        self._latitudeLabel = self.wTree.get_widget('labelLatitudeValue')
+        self._longitudeLabel = self.wTree.get_widget('labelLongitudeValue')
+        self._altitudeLabel = self.wTree.get_widget('labelAltitudeValue')
+        self._speedLabel = self.wTree.get_widget('labelSpeedValue')
+        self._hpvDopsLabel = self.wTree.get_widget('labelHPVDopsValue')
+        self._gpsLabelList = [self._latitudeLabel,
+                              self._longitudeLabel,
+                              self._altitudeLabel,
+                              self._speedLabel,
+                              self._hpvDopsLabel]
+        
         #Create our dictionay and connect it
         dic = { "NextWindow" : self.next_window,
                "StopLogging" : self.stop_logging,
@@ -108,9 +132,18 @@ class openBmapGTK:
         if valid:
             self._gsmLabel.set_text("%s / %s / %s" % servingCell[:3])
             self._gsmLabel2.set_text("%s / %s / %s" % servingCell[3:6])
+            
+            self._mccLabel.set_text('%s' % servingCell[0])
+            self._mncLabel.set_text('%s' % servingCell[1])
+            self._lacLabel.set_text('%s' % servingCell[2])
+            self._cidLabel.set_text('%s' % servingCell[3])
+            self._ssLabel.set_text('%s' % servingCell[4])
+            self._actType.set_text('%s' % servingCell[5])
         else:
             for w in [self._gsmLabel, self._gsmLabel2]:
                 w.set_text("N/A")
+            for w in self._gsmServingLabelList:
+                w.set_text('N/A')
         
         (valid, tstamp, lat, lng, alt, pdop, hdop, vdop, speed, heading) = self._obmlogger.get_gps_data()
         if valid:
@@ -118,9 +151,18 @@ class openBmapGTK:
             self._gpsAltitudeLabel.set_text('%s' % alt)
             self._dops.set_text('%s/%s/%s' % (pdop, hdop, vdop))
             self._speed.set_text('%s' % speed)
+            
+            self._latitudeLabel.set_text('%s' % lat)
+            self._longitudeLabel.set_text('%s' % lng)
+            self._altitudeLabel.set_text('%s' % alt)
+            self._speedLabel.set_text('%s' % speed)
+            self._hpvDopsLabel.set_text('%s\n%s\n%s' % (pdop, hdop, vdop))
         else:
             for w in [self._gpsPositionLabel, self._gpsAltitudeLabel, self._dops,
                        self._speed]:
+                w.set_text('N/A')
+            
+            for w in self._gpsLabelList:
                 w.set_text('N/A')
                 
             # quick improvement for notifying the user that: the GPS is active, and what it is waiting
