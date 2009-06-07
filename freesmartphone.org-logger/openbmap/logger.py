@@ -395,15 +395,16 @@ class Gsm:
             # in case of a change in registration not already taken into account here
             # by processing D-Bus signal by network_status_handler(), we prefer using data
             # from get_serving_cell_information()
-            lac = servingInfo['lac']
-            cid = servingInfo['cid']
+            if ('lac' in servingInfo) and ('cid' in servingInfo):
+                lac = servingInfo['lac']
+                cid = servingInfo['cid']
             
-            # deactivated. Timing advance only works for the serving cell, and when a channel is actually open
-            #if 'tav' in servingInfo:
-            #    tav = str(servingInfo['tav'])
-                
-            if 'rxlev' in servingInfo:
-                rxlev = str(servingInfo['rxlev'])
+                # deactivated. Timing advance only works for the serving cell, and when a channel is actually open
+                #if 'tav' in servingInfo:
+                #    tav = str(servingInfo['tav'])
+                    
+                if 'rxlev' in servingInfo:
+                    rxlev = str(servingInfo['rxlev'])
         
         logging.info("valid=%s, MCC=%s, MNC=%s, lac=%s, cid=%s, strength=%s, act=%s, tav=%s, rxlev=%s" %
              (valid, mcc, mnc, lac, cid, strength, act, tav, rxlev))
