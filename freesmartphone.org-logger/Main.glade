@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Sun Jun  7 16:37:06 2009 -->
+<!--Generated with glade3 3.4.5 on Sun Jun  7 20:59:55 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="windowMain">
     <property name="visible">True</property>
@@ -651,7 +651,6 @@ Dops</property>
             <child>
               <widget class="GtkLabel" id="label3">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">GPS</property>
               </widget>
               <packing>
                 <property name="type">label_item</property>
@@ -1383,7 +1382,6 @@ dBm</property>
             <child>
               <widget class="GtkLabel" id="label2">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">GSM Serving cell</property>
               </widget>
               <packing>
                 <property name="type">label_item</property>
@@ -1400,8 +1398,50 @@ dBm</property>
         <child>
           <widget class="GtkTable" id="table1">
             <property name="visible">True</property>
-            <property name="n_rows">2</property>
+            <property name="n_rows">3</property>
             <property name="n_columns">2</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <widget class="GtkButton" id="buttonNextWindow">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="response_id">0</property>
+                <signal name="clicked" handler="NextWindow"/>
+                <child>
+                  <widget class="GtkVBox" id="vbox4">
+                    <property name="visible">True</property>
+                    <child>
+                      <widget class="GtkImage" id="imageButtonExit">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">ExitButton.png</property>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="labelExit">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Exit</property>
+                      </widget>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </widget>
+                </child>
+              </widget>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+                <property name="y_options">GTK_FILL</property>
+              </packing>
+            </child>
             <child>
               <widget class="GtkButton" id="buttonGenerateLog">
                 <property name="visible">True</property>
@@ -1410,9 +1450,23 @@ dBm</property>
                 <property name="response_id">0</property>
                 <signal name="clicked" handler="StartLogging"/>
                 <child>
-                  <widget class="GtkImage" id="image2">
+                  <widget class="GtkVBox" id="vbox5">
                     <property name="visible">True</property>
-                    <property name="pixbuf">GenerateButton.png</property>
+                    <child>
+                      <widget class="GtkImage" id="image2">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">GenerateButton.png</property>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="labelStart">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Start</property>
+                      </widget>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
                   </widget>
                 </child>
               </widget>
@@ -1429,9 +1483,23 @@ dBm</property>
                 <property name="response_id">0</property>
                 <signal name="clicked" handler="StopLogging"/>
                 <child>
-                  <widget class="GtkImage" id="image1">
+                  <widget class="GtkVBox" id="vbox6">
                     <property name="visible">True</property>
-                    <property name="pixbuf">StopButton.png</property>
+                    <child>
+                      <widget class="GtkImage" id="image1">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">StopButton.png</property>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="labelStop">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Stop</property>
+                      </widget>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
                   </widget>
                 </child>
               </widget>
@@ -1449,35 +1517,27 @@ dBm</property>
                 <property name="response_id">0</property>
                 <signal name="clicked" handler="Upload"/>
                 <child>
-                  <widget class="GtkImage" id="image3">
+                  <widget class="GtkVBox" id="vbox7">
                     <property name="visible">True</property>
-                    <property name="pixbuf">UploadButton.png</property>
+                    <child>
+                      <widget class="GtkImage" id="image3">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">UploadButton.png</property>
+                      </widget>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="labelUpload">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Upload</property>
+                      </widget>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
                   </widget>
                 </child>
               </widget>
               <packing>
-                <property name="top_attach">1</property>
-                <property name="bottom_attach">2</property>
-                <property name="y_options">GTK_FILL</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkButton" id="buttonNextWindow">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="response_id">0</property>
-                <signal name="clicked" handler="NextWindow"/>
-                <child>
-                  <widget class="GtkImage" id="imageButtonExit">
-                    <property name="visible">True</property>
-                    <property name="pixbuf">ExitButton.png</property>
-                  </widget>
-                </child>
-              </widget>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
                 <property name="top_attach">1</property>
                 <property name="bottom_attach">2</property>
                 <property name="y_options">GTK_FILL</property>
