@@ -1135,7 +1135,7 @@ if not os.path.exists(Config.APP_HOME_DIR):
     os.mkdir(Config.APP_HOME_DIR)
             
 logging.basicConfig(filename=Config.TEMP_LOG_FILENAME,
-            level=logging.DEBUG,
+            level=logging.INFO,
             filemode='w',)
 config = Config()
 
