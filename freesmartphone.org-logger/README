@@ -1,4 +1,4 @@
-openBmap logger version 0.3.0
+openBmap logger version 0.3.1
 
 SUMMARY:
 ========
@@ -22,6 +22,18 @@ on GSM data
 * get a map of GSM coverage
 * get a map of 2, 2.5, 3G coverage (not yet implemented)
 * ...
+
+WHAT'S NEW SINCE 0.3.0?
+=======================
+* Debian package.
+* Button images do not embed any more text. The text is now a regular
+label under the image.
+* Button text is now "Start" instead of "Generate".
+* rxlev added to serving cell XML log, if available.
+* timing advance is available, but deactivated. It needs to be logged
+only on specific situation.
+* Application logging level set to INFO.
+* Details in CHANGELOG.
 
 WHAT'S NEW SINCE 0.2.1?
 =======================
