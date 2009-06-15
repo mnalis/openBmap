@@ -989,9 +989,9 @@ class ObmLogger():
                                    neighbourCells)
             else:
                 logging.info('Data were not valid for creating openBmap log.')
-                logging.debug("Validity=%s, MCC=%s, MNC=%s, lac=%s, cid=%s, strength=%i, act=%s, tav=%s, rxlev=%s"
+                logging.info("Validity=%s, MCC=%s, MNC=%s, lac=%s, cid=%s, strength=%i, act=%s, tav=%s, rxlev=%s"
                               % ((validGsm,) + servingCell) )
-                logging.debug("Validity=%s, lng=%f, lat=%f, alt=%f, spe=%f, hdop=%f, vdop=%f, pdop=%f" \
+                logging.info("Validity=%s, lng=%f, lat=%f, alt=%f, spe=%f, hdop=%f, vdop=%f, pdop=%f" \
                               % (validGps, lng, lat, alt, spe, hdop, vdop, pdop))
         
             self.notify_observers()
