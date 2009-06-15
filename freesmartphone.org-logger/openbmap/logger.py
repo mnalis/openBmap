@@ -996,7 +996,7 @@ class ObmLogger():
         
             self.notify_observers()
         duration = datetime.now() - startTime
-        logging.info("Logging loop ended, total duration: %i sec)." % duration.seconds)
+        logging.info("Logging loop ended, total duration: %i sec." % duration.seconds)
 
         if not self._logging:
             logging.debug('Logging loop is stopping.')
