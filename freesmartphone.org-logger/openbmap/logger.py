@@ -720,7 +720,7 @@ class ObmLogger():
         " pdop=\"%s\"" % ( ('%.*f' % (hvpdopPrecision, pdop)).rstrip('0').rstrip('.') ) + \
         "/>" + \
         "</scan>\n"
-        logging.debug(logmsg)
+        logging.info(logmsg)
         self.fileToSendLock.acquire()
         logging.info('OpenBmap log file lock acquired.')
         #debug
