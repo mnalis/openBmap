@@ -976,8 +976,8 @@ class ObmLogger():
             # described above.
             logging.info('Log canceled because a call is ongoing.')
         else:
-            (validGps, tstamp, lat, lng, alt, pdop, hdop, vdop, spe, heading) = self.get_gps_data()
             (validGsm, servingCell, neighbourCells) = self.get_gsm_data()
+            (validGps, tstamp, lat, lng, alt, pdop, hdop, vdop, spe, heading) = self.get_gps_data()
             # the test upon the speed, prevents from logging many times the same position with the same cell.
             # Nevertheless, it also prevents from logging the same position with the cell changing...
             if spe < minSpeed:
