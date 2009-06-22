@@ -978,9 +978,19 @@ class ObmLogger():
         else:
             (validGsm, servingCell, neighbourCells) = self.get_gsm_data()
             (validGps, tstamp, lat, lng, alt, pdop, hdop, vdop, spe, heading) = self.get_gps_data()
-            # the test upon the speed, prevents from logging many times the same position with the same cell.
-            # Nevertheless, it also prevents from logging the same position with the cell changing...
-            if spe < minSpeed:
+
+            duration = datetime.now() - startTime
+            timeLimitToGetData = 2
+
+            if (duration.seconds > timeLimitToGetData):
+                #to be sure to keep data consistent, we need to grab all the info in a reasonable amount
+                # of time. At 50 km/h, you go about 15 m / second.
+                # Thus you should spend only little time to grab everything you need.
+                logging.info('Log rejected because getting data took %i second(s), limit is %i second(s)'
+                             % (duration.seconds, timeLimitToGetData))
+            elif spe < minSpeed:
+                # the test upon the speed, prevents from logging many times the same position with the same cell.
+                # Nevertheless, it also prevents from logging the same position with the cell changing...
                 logging.info('Log rejected because speed (%g) is under minimal speed (%g).' % (spe, minSpeed))
             elif spe > maxSpeed:
                 logging.info('Log rejected because speed (%g) is over maximal speed (%g).' % (spe, maxSpeed))
