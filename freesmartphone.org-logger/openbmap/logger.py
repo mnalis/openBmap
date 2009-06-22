@@ -939,7 +939,7 @@ class ObmLogger():
         self.write_obm_log_to_disk()
 
     def log(self):
-        logging.debug("OpenBmap logger runs.")
+        logging.info("OpenBmap logger runs.")
         self._loggerLock.acquire()
         logging.debug('OBM logger locked by log().')
         scanSpeed = config.get(config.GENERAL, config.SCAN_SPEED_DEFAULT)
@@ -949,7 +949,7 @@ class ObmLogger():
 
         startTime = datetime.now()
         now = datetime.now();
-        logging.debug("Current date and time is: %s" % now)
+        logging.info("Current date and time is: %s" % now)
         #("yyyy-MM-dd HH:mm:ss.000");
         #adate = now.strftime("%Y-%m-%d %H-%M-%S.")
         # "%f" returns an empty result... so we compute ms by ourself.
