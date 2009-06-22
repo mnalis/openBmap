@@ -306,10 +306,11 @@ class Gsm:
         
         Each dictionary contains lac and cid fields.
         They may contain rxlev, c1, c2, and ctype.
+        Maximal timeout is 0.8 second.
         """
         results = []
         try:
-            data = self._gsmMonitoringIface.GetNeighbourCellInformation()
+            data = self._gsmMonitoringIface.GetNeighbourCellInformation(timeout = 0.8)
             for cell in data:
                 #logging.debug( 'Raw data neighbour cell: %s' % cell)
                 if "lac" and "cid" in cell:
