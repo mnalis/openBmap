@@ -988,7 +988,7 @@ class ObmLogger():
                 #to be sure to keep data consistent, we need to grab all the info in a reasonable amount
                 # of time. At 50 km/h, you go about 15 m / second.
                 # Thus you should spend only little time to grab everything you need.
-                logging.info('Log rejected because getting data took %i second(s), limit is %i second(s)'
+                logging.warning('Log rejected because getting data took %i second(s), limit is %i second(s)'
                              % (duration.seconds, timeLimitToGetData))
             elif spe < minSpeed:
                 # the test upon the speed, prevents from logging many times the same position with the same cell.
