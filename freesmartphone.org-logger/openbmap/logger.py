@@ -250,10 +250,11 @@ class Gsm:
         
         If available contains 'lac' and 'cid'. May contain 'rxlev' and 'tav'.
         Otherwise returns an empty dictionary.
+        Maximal timeout is 0.8 second.
         """
         result = {}
         try:
-            data = self._gsmMonitoringIface.GetServingCellInformation()
+            data = self._gsmMonitoringIface.GetServingCellInformation(timeout = 0.8)
             
             # Debug
             # string hex
