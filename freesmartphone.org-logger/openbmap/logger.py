@@ -162,9 +162,8 @@ class Gsm:
             else:
                 raise Exception, 'One or more required GSM data (MCC, MNC, lac, cid or strength) is missing.'
         except Exception, e:
-            logging.warning('Unable to get GSM data.')
+            logging.warning('Unable to get GSM data (%s).' % str(e))
             self.empty_GSM_data()
-            logging.warning(str(e))
         self.release_lock()
         logging.debug("GSM data updated, lock released.")
         self.notify_observers()
@@ -187,8 +186,7 @@ class Gsm:
                 logging.info('GSM data invalid, no signal strength update to %i dBm (%i %%)' %
                              (new_dbm, data))
         except Exception, e:
-            logging.warning('Unable to update GSM signal strength.')
-            logging.warning(str(e))
+            logging.warning('Unable to update GSM signal strength (%s).' % str(e))
         self.release_lock()
         logging.debug("GSM signal strength update finished, lock released.")
         self.notify_observers()
@@ -292,7 +290,7 @@ class Gsm:
                     result['lac'] = str(int(data["lac"], 16))
                     result['cid'] = str(int(data["cid"], 16))
                 else:
-                    logging.debug('Either lac or cid is missing in serving cell information.')
+                    logging.warning('Either lac or cid is missing in serving cell information.')
                     result.clear()
 
         except Exception, e:
@@ -778,7 +776,7 @@ class ObmLogger():
         """
 
         if len(self._logsInMemory) == 0:
-            logging.debug('No log to write to disk, returning.')
+            logging.info('No log to write to disk, returning.')
             return
 
         now = datetime.now()
@@ -1011,10 +1009,10 @@ class ObmLogger():
         logging.info("Logging loop ended, total duration: %i sec." % duration.seconds)
 
         if not self._logging:
-            logging.debug('Logging loop is stopping.')
+            logging.info('Logging loop is stopping.')
             self._loggingThread = None
         else:
-            logging.debug('Next logging loop scheduled in %d seconds.' % scanSpeed)
+            logging.info('Next logging loop scheduled in %d seconds.' % scanSpeed)
         # storing in 'result' prevents modification of the return value between
         # the lock release() and the return statement.
         result = self._logging
@@ -1035,7 +1033,7 @@ class ObmLogger():
             self._logging = True
             scanSpeed = config.get(config.GENERAL, config.SCAN_SPEED_DEFAULT)
             self._loggingThread = gobject.timeout_add_seconds( scanSpeed, self.log )
-            logging.info('OBM logger scheduled every %i second(s).' % scanSpeed)
+            logging.info('start_logging: OBM logger scheduled every %i second(s).' % scanSpeed)
         # be sure to notify as soon as possible the views, for better feedback
         self.notify_observers()
         self._loggerLock.release()
@@ -1050,7 +1048,7 @@ class ObmLogger():
         else:
             logging.debug('OBM logger locked by stop_logging().')
             self._logging = False
-            logging.debug('Requested logger to stop.')
+            logging.info('Requested logger to stop.')
             self._loggerLock.release()
             logging.debug('OBM logger lock released by stop_logging().')
         
