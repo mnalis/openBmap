@@ -1,111 +1,116 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Sun Jun  7 20:59:55 2009 -->
+<?xml version="1.0"?>
 <glade-interface>
+  <!-- interface-requires gtk+ 2.16 -->
+  <!-- interface-naming-policy toplevel-contextual -->
   <widget class="GtkWindow" id="windowMain">
     <property name="visible">True</property>
     <child>
       <widget class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
         <child>
-          <widget class="GtkExpander" id="expander1">
+          <widget class="GtkTable" id="table2">
             <property name="visible">True</property>
+            <property name="n_rows">4</property>
+            <property name="n_columns">2</property>
+            <child>
+              <widget class="GtkLabel" id="displayGpsAlt">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">N/A</property>
+              </widget>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="label1">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Altitude :</property>
+              </widget>
+              <packing>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+                <property name="x_options"></property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="displayDops">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">N/A</property>
+              </widget>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="labelHPVDop">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">HPV-Dop :</property>
+              </widget>
+              <packing>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+                <property name="x_options"></property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="displaySpeed">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">N/A</property>
+              </widget>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">3</property>
+                <property name="bottom_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="labelSpeed">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Speed (km/h) :</property>
+              </widget>
+              <packing>
+                <property name="top_attach">3</property>
+                <property name="bottom_attach">4</property>
+                <property name="x_options"></property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="displayGpsPosition">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">N/A</property>
+              </widget>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="labelGPSLatLng">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">GPS Lat/Lng :</property>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkExpander" id="expander1">
             <property name="can_focus">True</property>
             <property name="expanded">True</property>
             <child>
               <widget class="GtkVBox" id="vbox3">
                 <property name="visible">True</property>
                 <child>
-                  <widget class="GtkTable" id="table2">
-                    <property name="visible">True</property>
-                    <property name="n_rows">4</property>
-                    <property name="n_columns">2</property>
-                    <child>
-                      <widget class="GtkLabel" id="displayGpsAlt">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">N/A</property>
-                      </widget>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">1</property>
-                        <property name="bottom_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkLabel" id="label1">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Altitude :</property>
-                      </widget>
-                      <packing>
-                        <property name="top_attach">1</property>
-                        <property name="bottom_attach">2</property>
-                        <property name="x_options"></property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkLabel" id="displayDops">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">N/A</property>
-                      </widget>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">2</property>
-                        <property name="bottom_attach">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkLabel" id="labelHPVDop">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">HPV-Dop :</property>
-                      </widget>
-                      <packing>
-                        <property name="top_attach">2</property>
-                        <property name="bottom_attach">3</property>
-                        <property name="x_options"></property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkLabel" id="displaySpeed">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">N/A</property>
-                      </widget>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">3</property>
-                        <property name="bottom_attach">4</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkLabel" id="labelSpeed">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Speed (km/h) :</property>
-                      </widget>
-                      <packing>
-                        <property name="top_attach">3</property>
-                        <property name="bottom_attach">4</property>
-                        <property name="x_options"></property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkLabel" id="displayGpsPosition">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">N/A</property>
-                      </widget>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkLabel" id="labelGPSLatLng">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">GPS Lat/Lng :</property>
-                      </widget>
-                    </child>
-                  </widget>
+                  <placeholder/>
                 </child>
                 <child>
                   <widget class="GtkTable" id="table5">
@@ -115,7 +120,7 @@
                       <widget class="GtkLabel" id="labelHPVDopsValue">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">N/A</property>
-                        <property name="justify">GTK_JUSTIFY_CENTER</property>
+                        <property name="justify">center</property>
                       </widget>
                       <packing>
                         <property name="left_attach">8</property>
@@ -129,7 +134,7 @@
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">HPV
 Dops</property>
-                        <property name="justify">GTK_JUSTIFY_CENTER</property>
+                        <property name="justify">center</property>
                       </widget>
                       <packing>
                         <property name="left_attach">8</property>
@@ -234,7 +239,7 @@ Dops</property>
                       <widget class="GtkLabel" id="labelAltitudeValue">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">N/A</property>
-                        <property name="justify">GTK_JUSTIFY_CENTER</property>
+                        <property name="justify">center</property>
                       </widget>
                       <packing>
                         <property name="left_attach">4</property>
@@ -247,7 +252,7 @@ Dops</property>
                       <widget class="GtkLabel" id="labelAltitude">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">Altitude</property>
-                        <property name="justify">GTK_JUSTIFY_CENTER</property>
+                        <property name="justify">center</property>
                       </widget>
                       <packing>
                         <property name="left_attach">4</property>
@@ -352,8 +357,8 @@ Dops</property>
                       <widget class="GtkLabel" id="labelSpeedValue">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">N/A</property>
-                        <property name="justify">GTK_JUSTIFY_CENTER</property>
-                        <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
+                        <property name="justify">center</property>
+                        <property name="ellipsize">end</property>
                       </widget>
                       <packing>
                         <property name="left_attach">6</property>
@@ -367,7 +372,7 @@ Dops</property>
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">Speed
 (km/h)</property>
-                        <property name="justify">GTK_JUSTIFY_CENTER</property>
+                        <property name="justify">center</property>
                       </widget>
                       <packing>
                         <property name="left_attach">6</property>
@@ -380,8 +385,8 @@ Dops</property>
                       <widget class="GtkLabel" id="labelLongitudeValue">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">N/A</property>
-                        <property name="justify">GTK_JUSTIFY_CENTER</property>
-                        <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
+                        <property name="justify">center</property>
+                        <property name="ellipsize">end</property>
                       </widget>
                       <packing>
                         <property name="left_attach">2</property>
@@ -394,8 +399,8 @@ Dops</property>
                       <widget class="GtkLabel" id="labelLatitudeValue">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">N/A</property>
-                        <property name="justify">GTK_JUSTIFY_CENTER</property>
-                        <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
+                        <property name="justify">center</property>
+                        <property name="ellipsize">end</property>
                       </widget>
                       <packing>
                         <property name="top_attach">3</property>
@@ -488,7 +493,7 @@ Dops</property>
                       <widget class="GtkLabel" id="labelLongitude">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">Longitude</property>
-                        <property name="justify">GTK_JUSTIFY_CENTER</property>
+                        <property name="justify">center</property>
                       </widget>
                       <packing>
                         <property name="left_attach">2</property>
@@ -501,7 +506,7 @@ Dops</property>
                       <widget class="GtkLabel" id="labelLatitude">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">Latitude</property>
-                        <property name="justify">GTK_JUSTIFY_CENTER</property>
+                        <property name="justify">center</property>
                       </widget>
                       <packing>
                         <property name="top_attach">1</property>
@@ -657,66 +662,74 @@ Dops</property>
               </packing>
             </child>
           </widget>
+          <packing>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkTable" id="table3">
+            <property name="visible">True</property>
+            <property name="n_rows">2</property>
+            <property name="n_columns">2</property>
+            <child>
+              <widget class="GtkLabel" id="displayCidStrength">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">N/A</property>
+                <property name="ellipsize">end</property>
+              </widget>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="labelLacCid">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">CID/Strength/Type :</property>
+                <property name="ellipsize">end</property>
+              </widget>
+              <packing>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="displayGsm">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">N/A</property>
+                <property name="ellipsize">end</property>
+              </widget>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkLabel" id="labelGsm">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">GSM MCC/MNC/LAC :</property>
+                <property name="ellipsize">end</property>
+              </widget>
+              <packing>
+                <property name="x_padding">4</property>
+              </packing>
+            </child>
+          </widget>
+          <packing>
+            <property name="position">2</property>
+          </packing>
         </child>
         <child>
           <widget class="GtkExpander" id="expanderGSMServing">
-            <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="expanded">True</property>
             <child>
               <widget class="GtkVBox" id="vbox2">
                 <property name="visible">True</property>
                 <child>
-                  <widget class="GtkTable" id="table3">
-                    <property name="visible">True</property>
-                    <property name="n_rows">2</property>
-                    <property name="n_columns">2</property>
-                    <child>
-                      <widget class="GtkLabel" id="displayCidStrength">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">N/A</property>
-                        <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
-                      </widget>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                        <property name="top_attach">1</property>
-                        <property name="bottom_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkLabel" id="labelLacCid">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">CID/Strength/Type :</property>
-                        <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
-                      </widget>
-                      <packing>
-                        <property name="top_attach">1</property>
-                        <property name="bottom_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkLabel" id="displayGsm">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">N/A</property>
-                        <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
-                      </widget>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="right_attach">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkLabel" id="labelGsm">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">GSM MCC/MNC/LAC :</property>
-                        <property name="ellipsize">PANGO_ELLIPSIZE_END</property>
-                      </widget>
-                      <packing>
-                        <property name="x_padding">4</property>
-                      </packing>
-                    </child>
-                  </widget>
+                  <placeholder/>
                 </child>
                 <child>
                   <widget class="GtkTable" id="table4">
@@ -726,7 +739,7 @@ Dops</property>
                       <widget class="GtkLabel" id="labelAccessTypeValue">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">N/A</property>
-                        <property name="justify">GTK_JUSTIFY_CENTER</property>
+                        <property name="justify">center</property>
                       </widget>
                       <packing>
                         <property name="left_attach">10</property>
@@ -740,7 +753,7 @@ Dops</property>
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">Access
 Type</property>
-                        <property name="justify">GTK_JUSTIFY_CENTER</property>
+                        <property name="justify">center</property>
                       </widget>
                       <packing>
                         <property name="left_attach">10</property>
@@ -1151,7 +1164,7 @@ Type</property>
                       <widget class="GtkLabel" id="labelCellSignalStrengthValue">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">N/A</property>
-                        <property name="justify">GTK_JUSTIFY_CENTER</property>
+                        <property name="justify">center</property>
                       </widget>
                       <packing>
                         <property name="left_attach">8</property>
@@ -1165,7 +1178,7 @@ Type</property>
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">Strength
 dBm</property>
-                        <property name="justify">GTK_JUSTIFY_CENTER</property>
+                        <property name="justify">center</property>
                       </widget>
                       <packing>
                         <property name="left_attach">8</property>
@@ -1178,7 +1191,7 @@ dBm</property>
                       <widget class="GtkLabel" id="labelCIDValue">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">N/A</property>
-                        <property name="justify">GTK_JUSTIFY_CENTER</property>
+                        <property name="justify">center</property>
                       </widget>
                       <packing>
                         <property name="left_attach">6</property>
@@ -1192,7 +1205,7 @@ dBm</property>
                       <widget class="GtkLabel" id="labelCID">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">ID</property>
-                        <property name="justify">GTK_JUSTIFY_CENTER</property>
+                        <property name="justify">center</property>
                       </widget>
                       <packing>
                         <property name="left_attach">6</property>
@@ -1206,7 +1219,7 @@ dBm</property>
                       <widget class="GtkLabel" id="labelLACValue">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">N/A</property>
-                        <property name="justify">GTK_JUSTIFY_CENTER</property>
+                        <property name="justify">center</property>
                       </widget>
                       <packing>
                         <property name="left_attach">4</property>
@@ -1220,7 +1233,7 @@ dBm</property>
                       <widget class="GtkLabel" id="labelLAC">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">LAC</property>
-                        <property name="justify">GTK_JUSTIFY_CENTER</property>
+                        <property name="justify">center</property>
                       </widget>
                       <packing>
                         <property name="left_attach">4</property>
@@ -1290,7 +1303,7 @@ dBm</property>
                       <widget class="GtkLabel" id="labelMNCValue">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">N/A</property>
-                        <property name="justify">GTK_JUSTIFY_CENTER</property>
+                        <property name="justify">center</property>
                       </widget>
                       <packing>
                         <property name="left_attach">2</property>
@@ -1304,7 +1317,7 @@ dBm</property>
                       <widget class="GtkLabel" id="labelMNC">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">MNC</property>
-                        <property name="justify">GTK_JUSTIFY_CENTER</property>
+                        <property name="justify">center</property>
                       </widget>
                       <packing>
                         <property name="left_attach">2</property>
@@ -1330,7 +1343,7 @@ dBm</property>
                       <widget class="GtkLabel" id="labelMCCValue">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">N/A</property>
-                        <property name="justify">GTK_JUSTIFY_CENTER</property>
+                        <property name="justify">center</property>
                       </widget>
                       <packing>
                         <property name="top_attach">3</property>
@@ -1364,7 +1377,7 @@ dBm</property>
                       <widget class="GtkLabel" id="labelMCC">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">MCC</property>
-                        <property name="justify">GTK_JUSTIFY_CENTER</property>
+                        <property name="justify">center</property>
                       </widget>
                       <packing>
                         <property name="top_attach">1</property>
@@ -1389,11 +1402,8 @@ dBm</property>
             </child>
           </widget>
           <packing>
-            <property name="position">1</property>
+            <property name="position">3</property>
           </packing>
-        </child>
-        <child>
-          <placeholder/>
         </child>
         <child>
           <widget class="GtkTable" id="table1">
@@ -1401,17 +1411,10 @@ dBm</property>
             <property name="n_rows">3</property>
             <property name="n_columns">2</property>
             <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
               <widget class="GtkButton" id="buttonNextWindow">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="NextWindow"/>
                 <child>
                   <widget class="GtkVBox" id="vbox4">
@@ -1421,6 +1424,9 @@ dBm</property>
                         <property name="visible">True</property>
                         <property name="pixbuf">ExitButton.png</property>
                       </widget>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
                     </child>
                     <child>
                       <widget class="GtkLabel" id="labelExit">
@@ -1447,7 +1453,6 @@ dBm</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="StartLogging"/>
                 <child>
                   <widget class="GtkVBox" id="vbox5">
@@ -1457,6 +1462,9 @@ dBm</property>
                         <property name="visible">True</property>
                         <property name="pixbuf">GenerateButton.png</property>
                       </widget>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
                     </child>
                     <child>
                       <widget class="GtkLabel" id="labelStart">
@@ -1480,7 +1488,6 @@ dBm</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="StopLogging"/>
                 <child>
                   <widget class="GtkVBox" id="vbox6">
@@ -1490,6 +1497,9 @@ dBm</property>
                         <property name="visible">True</property>
                         <property name="pixbuf">StopButton.png</property>
                       </widget>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
                     </child>
                     <child>
                       <widget class="GtkLabel" id="labelStop">
@@ -1514,7 +1524,6 @@ dBm</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="Upload"/>
                 <child>
                   <widget class="GtkVBox" id="vbox7">
@@ -1524,6 +1533,9 @@ dBm</property>
                         <property name="visible">True</property>
                         <property name="pixbuf">UploadButton.png</property>
                       </widget>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
                     </child>
                     <child>
                       <widget class="GtkLabel" id="labelUpload">
@@ -1543,10 +1555,16 @@ dBm</property>
                 <property name="y_options">GTK_FILL</property>
               </packing>
             </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
           </widget>
           <packing>
             <property name="expand">False</property>
-            <property name="position">3</property>
+            <property name="position">4</property>
           </packing>
         </child>
       </widget>
