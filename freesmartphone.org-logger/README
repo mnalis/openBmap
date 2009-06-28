@@ -1,4 +1,4 @@
-openBmap logger version 0.3.1
+openBmap logger version 0.3.2
 
 SUMMARY:
 ========
@@ -10,6 +10,10 @@ GPS coordinate. This data are sent to the website (www.openbmap.org),
 in order to build a free database. In order to keep a high quality
 of data, we store GPS quality, speed, GSM signal strength, etc... This
 is what makes us different from other similar projects: focus on quality.
+
+This free database will allow research and experimentation about
+location algorithms, security, location based services development,
+etc.
 
 Possible uses of this database:
 * get your location based on the current GSM cell you are connected to.
@@ -25,6 +29,7 @@ on GSM data
 
 WHAT'S NEW SINCE 0.3.0?
 =======================
+(Version 0.3.1 has never been officially released.)
 * Debian package.
 * Button images do not embed any more text. The text is now a regular
 label under the image.
@@ -32,7 +37,9 @@ label under the image.
 * rxlev added to serving cell XML log, if available.
 * timing advance is available, but deactivated. It needs to be logged
 only on specific situation.
-* Application logging level set to INFO.
+* Application logging level set to INFO by default.
+* Logging level of some application messages have been changed.
+* In a loop, time is now limited to get all data necessary.
 * Details in CHANGELOG.
 
 WHAT'S NEW SINCE 0.2.1?

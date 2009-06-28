@@ -1,5 +1,13 @@
 
-Version 0.3.1
+Version 0.3.2
+* Logging level of some application messages have been changed.
+* Moved get GPS data after get GSM data, to ease debug.
+* In a loop, time is now limited to get all data necessary.
+* Set the timeout limit of dbus get neighbour cells info.
+* Set the timeout limit of dbus get serving cell info.
+* Expanders set to invisible.
+
+Version 0.3.1 (never officially released)
 * distutils support.
 * Debian package.
 * get_serving_cell_information() added using FSO monitoring interface.
