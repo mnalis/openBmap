@@ -111,7 +111,7 @@ class openBmapGTK:
         self._obmlogger.stop_logging()
         
     def exit_obm(self, widget):
-        logging.debug('Exiting on request of the user.')
+        logging.info('Exiting on request of the user.')
         if self._obmlogger.is_logging():
             self.stop_logging(widget)
             logging.debug('Still logging, wait...')
@@ -119,7 +119,7 @@ class openBmapGTK:
             return True
         else:
             self._obmlogger.exit_openBmap()
-            logging.debug('Exiting...')
+            logging.info('Exiting...')
             gobject.idle_add(gtk.main_quit, )
         
     def start_logging(self, widget):
