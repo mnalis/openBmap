@@ -466,6 +466,7 @@ class Config:
         # puts sth <=0 to MAX_LOGS_FILE_SIZE to ignore it and let other conditions trigger
         # the write of the log to disk (e.g. NB_OF_LOGS_PER_FILE)
         self.MAX_LOGS_FILE_SIZE = 'Maximal size of log files to be uploaded (kbytes)'
+        self.APP_LOGGING_LEVEL = 'Application logging level (debug, info, warning, error, critical)'
         
         self.CREDENTIALS = 'Credentials'
         self.OBM_LOGIN = 'OpenBmap login'
@@ -508,6 +509,7 @@ class Config:
                 config.set(self.GENERAL, self.MAX_SPEED_FOR_LOGGING, 150)
                 config.set(self.GENERAL, self.NB_OF_LOGS_PER_FILE, 3)
                 config.set(self.GENERAL, self.MAX_LOGS_FILE_SIZE, 20)
+                config.set(self.GENERAL, self.APP_LOGGING_LEVEL, 'info')
                 
                 config.add_section(self.CREDENTIALS)
                 config.set(self.CREDENTIALS, self.OBM_LOGIN, 'your_login')
@@ -523,6 +525,16 @@ class Config:
                           self.NB_OF_LOGS_PER_FILE,
                           self.MAX_LOGS_FILE_SIZE]:
                 return self._config.getint(section, option)
+            elif option in [self.APP_LOGGING_LEVEL]:
+                res = str.upper(self._config.get(section, option))
+                if not res in ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']:
+                    errMsg = 'Application logging level should be one of'\
+                    ' DEBUG, INFO, WARNING, ERROR, CRITICAL.'\
+                    ' Found: %s' % res
+                    logging.error(errMsg)
+                    raise Exception, errMsg
+                else:
+                    return res
             else:
                 return self._config.get(section, option)
         except Exception, e:
@@ -531,13 +543,15 @@ class Config:
             defaultValue = 0
             if option in [self.MAX_LOGS_FILE_SIZE]:
                 defaultValue = 20
+            elif option in [self.APP_LOGGING_LEVEL]:
+                defaultValue = 'INFO'
             else:
                 logging.critical("get_option() does not find (%s / %s). This is much probably a bug." % (section, option))
                 logging.critical(str(e))
                 #TODO: well in case this happens, this should be forwarded to Views (GUI) in order to inform the user
                 sys.exit(-1)
             self._config.set(self.GENERAL, option, defaultValue)
-            logging.info('Option \'%s\' cannot be found. Add it to the config file with default value: %i'
+            logging.info('Option \'%s\' cannot be found. Add it to the config file with default value: %s'
                          % (option, defaultValue))
             self.save_config()
             return defaultValue
@@ -643,6 +657,11 @@ class ObmLogger():
         % ( self._gsm.get_device_info() + (config.SOFTWARE_VERSION,) )
         self._logFileTail = '</logfile>'
         
+        logLvl = config.get(config.GENERAL, config.APP_LOGGING_LEVEL)
+        logLvl = logging.__dict__[logLvl]
+        logging.getLogger().setLevel(logLvl)
+        logging.info('Application logging level set to %s' % logging.getLevelName(logLvl))
+
         # DEBUG = True if you want to activate GPS/Web connection simulation
         self.DEBUG = False
         if self.DEBUG:
