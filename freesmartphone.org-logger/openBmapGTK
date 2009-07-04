@@ -29,6 +29,7 @@ except:
 	sys.exit(1)
 import logging
 import gobject
+import os.path
 
 import openbmap.logger
 
@@ -38,8 +39,27 @@ class openBmapGTK:
     def __init__(self):
 
         #Set the Glade file
-        self.gladefile = "/usr/share/openBmap/Main.glade"  
-        self.wTree = gtk.glade.XML(self.gladefile) 
+        possibleGladeFile = None
+        pathsTried = ''
+        for path in [sys.path[0], os.path.split(sys.path[0])[0]]:
+            for p in ['', os.path.join('share', 'openBmap')]:
+                possibleGladeFile = os.path.join(path, p, 'Main.glade')
+                pathsTried += '\n' + possibleGladeFile
+                if os.path.exists(possibleGladeFile):
+                    print 'Try loading %s glade file.' % possibleGladeFile
+                    break
+                else:
+                    possibleGladeFile = None
+            if possibleGladeFile:
+                break
+
+        if not possibleGladeFile:
+            print 'No graphical interface file found! Have tried: %s' % pathsTried
+            sys.exit(-1)
+        else:
+            del pathsTried
+
+        self.wTree = gtk.glade.XML(possibleGladeFile)
 		
         #Get the Main Window, and connect the "destroy" event
         self.window = self.wTree.get_widget("windowMain")
