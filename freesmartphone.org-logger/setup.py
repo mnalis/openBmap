@@ -23,7 +23,7 @@ setup(name='openbmap-logger',
                     ('share/openBmap', ['AUTHORS', 'CHANGELOG', 'README',
                                         'ExitButton.png', 'GenerateButton.png',
                                         'StopButton.png', 'UploadButton.png',
-                                        'Main.glade',
+                                        'Go-jump.png', 'Main.glade',
                                         'gpl.txt', 'lgpl.txt' ]),
                     ('share/pixmaps', ['openBmap-desktop.png'])
                     ],
