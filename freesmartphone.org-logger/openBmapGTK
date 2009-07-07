@@ -63,6 +63,8 @@ class openBmapGTK:
 		
         #Get the Main Window, and connect the "destroy" event
         self.window = self.wTree.get_widget("windowMain")
+        self._windowMenu = self.wTree.get_widget('windowMenu')
+
         if (self.window):
             self.window.connect("destroy", self.exit_obm)
             
@@ -74,7 +76,7 @@ class openBmapGTK:
         self._speed = self.wTree.get_widget('displaySpeed')
         self._stopLogging = self.wTree.get_widget('buttonStopLogging')
         self._startLogging = self.wTree.get_widget('buttonGenerateLog')
-        
+
         self._mccLabel = self.wTree.get_widget('labelMCCValue')
         self._mncLabel = self.wTree.get_widget('labelMNCValue')
         self._lacLabel = self.wTree.get_widget('labelLACValue')
@@ -99,11 +101,21 @@ class openBmapGTK:
                               self._speedLabel,
                               self._hpvDopsLabel]
         
-        #Create our dictionay and connect it
+        self._nbServSinceStartLabel = self.wTree.get_widget('labelNbServSinceStart')
+        self._nbServSinceLaunchLabel = self.wTree.get_widget('labelNbServSinceLaunch')
+        self._nbNeigSinceStartLabel = self.wTree.get_widget('labelNbNeigSinceStart')
+        self._nbNeigSinceLaunchLabel = self.wTree.get_widget('labelNbNeigSinceLaunch')
+        self._nbNeigCurrentLabel = self.wTree.get_widget('labelNbNeigCurrent')
+
+        self._LoggingStatusLabel = self.wTree.get_widget('labelLoggingStatus')
+
+        #Create our dictionary and connect it
         dic = { "NextWindow" : self.next_window,
                "StopLogging" : self.stop_logging,
                "StartLogging" : self.start_logging,
-               "Upload" : self.upload }
+               "Upload" : self.upload,
+               "ShowMenu" : self.show_menu_window,
+               "ShowMainWindow" : self.show_main_window }
         self.wTree.signal_autoconnect(dic)
         
         self._plsWait = gtk.MessageDialog(self.window,
@@ -116,6 +128,21 @@ class openBmapGTK:
         self._obmlogger.register(self)
         self._obmlogger.init_openBmap()
         
+        context = self._cidLabel.get_pango_context()
+        font = context.get_font_description()
+        self._biggerLabels = [self._cidLabel, self._speedLabel, self._hpvDopsLabel]
+        self._biggerLabels2 = [self._hpvDopsLabel, self._nbServSinceStartLabel,
+                               self._nbServSinceLaunchLabel,
+                               self._nbNeigSinceStartLabel, self._nbNeigSinceLaunchLabel,
+                               self._nbNeigCurrentLabel,
+                               self._LoggingStatusLabel]
+        font.set_size(int(font.get_size() * 3))
+        for l in self._biggerLabels:
+            l.modify_font(font)
+        font.set_size(int(font.get_size() *2/3))
+        for l in self._biggerLabels2:
+            l.modify_font(font)
+
     def next_window(self, widget):
         """Cycle through the windows."""
         #TODO: not yet implemented: Exit right now
@@ -123,6 +150,18 @@ class openBmapGTK:
         self.exit_obm(widget)
         gobject.timeout_add_seconds(2, self.exit_obm, widget)
         
+    def show_menu_window(self, widget):
+        self._windowMenu.show()
+        while gtk.events_pending():
+            gtk.main_iteration(False)
+        self.window.hide()
+
+    def show_main_window(self, widget):
+        self.window.show()
+        while gtk.events_pending():
+            gtk.main_iteration(False)
+        self._windowMenu.hide()
+
     def stop_logging(self, widget):
         self._plsWait.text = 'Stopping the logger. Please wait...'
         self._plsWait.show_all()
@@ -144,6 +183,7 @@ class openBmapGTK:
         
     def start_logging(self, widget):
         self._obmlogger.start_logging()
+        self.show_main_window(widget)
         
     def notify(self):
         """This method will be called by the observable we are registered too upon change."""
@@ -159,11 +199,13 @@ class openBmapGTK:
             self._cidLabel.set_text('%s' % servingCell[3])
             self._ssLabel.set_text('%s' % servingCell[4])
             self._actType.set_text('%s' % servingCell[5])
+            self._nbNeigCurrentLabel.set_text('%s' % len(neighbourCells))
         else:
             for w in [self._gsmLabel, self._gsmLabel2]:
                 w.set_text("N/A")
             for w in self._gsmServingLabelList:
                 w.set_text('N/A')
+            self._nbNeigCurrentLabel.set_text('N/A')
         
         (valid, tstamp, lat, lng, alt, pdop, hdop, vdop, speed, heading) = self._obmlogger.get_gps_data()
         if valid:
@@ -174,8 +216,8 @@ class openBmapGTK:
             
             self._latitudeLabel.set_text('%s' % lat)
             self._longitudeLabel.set_text('%s' % lng)
-            self._altitudeLabel.set_text('%s' % alt)
-            self._speedLabel.set_text('%s' % speed)
+            self._altitudeLabel.set_text('%i' % alt)
+            self._speedLabel.set_text('%.2f' % speed)
             self._hpvDopsLabel.set_text('%s\n%s\n%s' % (pdop, hdop, vdop))
         else:
             for w in [self._gpsPositionLabel, self._gpsAltitudeLabel, self._dops,
@@ -195,6 +237,9 @@ class openBmapGTK:
         self._stopLogging.set_sensitive(isLogging)
         if not isLogging:
             self._plsWait.hide()
+            self._LoggingStatusLabel.set_text('OFF')
+        else:
+            self._LoggingStatusLabel.set_text('ON')
                 
     def upload(self, widget):
         """Upload logs to OpenBmap database."""
