@@ -47,6 +47,17 @@ class Gsm:
         self._MNC = ''
         self._registrationGSM = ''
         
+        #This will remember all the cells seen. The structure is:
+        # {id}->{MCC}->{MNC}->( {LAC}->[cid], {LAC}->[cid] ) 0: servings, 1: neighbours
+        self._remember_cells_structures = {}
+        self._current_remember_cells_structure_id = None
+        self.REMEMBER_CELLS_STRUCTURE_TOTAL_ID = 'Total number of cells since Launch'
+        self.set_current_remember_cells_id(self.REMEMBER_CELLS_STRUCTURE_TOTAL_ID)
+        self._nb_remember_servings_in_last_structure = 0
+        self._nb_remember_neighbours_in_last_structure = 0
+        self._nb_remember_servings_total = 0
+        self._nb_remember_neighbours_total = 0
+
         self._manufacturer = 'N/A'
         self._model = 'N/A'
         self._revision = 'N/A'
@@ -159,6 +170,10 @@ class Gsm:
                     logging.info("MCC %s MNC %s LAC %s, CID %s, strength %i/%i/%i (dBm, modem, percent 0-100)" % \
                                  (self._MCC, self._MNC, self._lac, self._cid,
                                   self._strength, val_from_modem, data['strength']))
+                self.remember_serving_cell_as_seen(self._current_remember_cells_structure_id,
+                                                   [{'lac':self._lac,
+                                                     'cid':self._cid}]
+                                                   )
             else:
                 raise Exception, 'One or more required GSM data (MCC, MNC, lac, cid or strength) is missing.'
         except Exception, e:
@@ -405,10 +420,13 @@ class Gsm:
                     
                 if 'rxlev' in servingInfo:
                     rxlev = str(servingInfo['rxlev'])
-        
+
+            self.remember_neighbour_cells_as_seen(self._current_remember_cells_structure_id,
+                                                  neighbourCells)
+
         logging.info("valid=%s, MCC=%s, MNC=%s, lac=%s, cid=%s, strength=%s, act=%s, tav=%s, rxlev=%s" %
              (valid, mcc, mnc, lac, cid, strength, act, tav, rxlev))
-                
+
         self.release_lock()
         logging.debug("GSM data read, lock released.")
         return (valid, (mcc, mnc, lac, cid, strength, act, tav, rxlev), neighbourCells )
@@ -421,7 +439,174 @@ class Gsm:
         """
         status = self._gsmNetworkIface.GetStatus()
         self.network_status_handler(status)
+
+    def create_remember_cells_structure (self, id):
+        """Tries to create a remember cells structure with given id.
+
+        Throws exception if id already exists.
+        Returns id on success."""
+        if id in self._remember_cells_structures:
+            raise Exception, 'create_remember_cells_strucutre(): id already exists.'
+        else:
+            self._remember_cells_structures[id] = {}
+            logging.info('id:%s added to remember cells structure.' % id)
+            return id
+
+    def remember_cells_as_seen(self, id, cells, type):
+        """Parses cells dictionaries list and remembers having seen it.
+
+        id: id of the remember cells structure to act upon
+        cells: a list of dictionaries describing cells to remember
+        type: 0 : servings, 1 : neighbours
+        Cells already seen are ignored.
+        If the id is not the one from the structure used to remember all the cells,
+        and a new value is added, it calls the method on the "total" structure."""
+
+        if not type in (0, 1):
+            raise Exception, 'remember_cells_as_seen() wrong type value (%s).' % type
+
+        structure = self._remember_cells_structures
+
+        if not id in structure:
+            logging.warning('Remember_cells_as_seen(): id (%s) cannot be found.' % id)
+            return
+        else:
+            structure = self._remember_cells_structures[id]
+
+        if self._MCC == '':
+            logging.debug('remember_cells_as_seen(): ignores empty MCC.')
+            return
+        elif not self._MCC in structure:
+            logging.info('Adds MCC:%s to remember cell structure id (%s).' % (self._MCC, id))
+            structure[self._MCC] = {}
+
+        structure = structure[self._MCC]
+
+        if self._MNC == '':
+            logging.debug('remember_cells_as_seen(): ignores empty MNC.')
+            return
+        elif not self._MNC in structure:
+            logging.info('Adds MNC:%s to remember cell structure id (%s), MCC:%s.' %
+                         (self._MNC, id, self._MCC))
+            # servings and neighbours
+            structure[self._MNC] = ({}, {})
+
+        structure = structure[self._MNC][type]
+        logging.info('Update remember cells structure for %s.' % ['servings', 'neighbours'][type])
+
+        for cell in cells:
+            if cell['lac'] in structure:
+                if cell['cid'] in structure[ cell['lac'] ]:
+                    logging.debug('Cell %(lac)s / %(cid)s has already been seen' % cell)
+                    continue
+                else:
+                    structure[ cell['lac'] ].append(cell['cid'])
+                    logging.info('Cell %(lac)s / %(cid)s adds a new cid to remember' % cell +
+                                 ' to structure id: %s' % id)
+            else:
+                structure[ cell['lac'] ] = [ cell['cid'] ]
+                logging.info('Cell %(lac)s / %(cid)s adds new lac and cid to remember' % cell +
+                             ' to structure id: %s' % id)
+            self.increase_remember_cells_stats(id, type)
+            if id != self.REMEMBER_CELLS_STRUCTURE_TOTAL_ID:
+                    # we are not in the structure which gathers *all* cells seen
+                    logging.debug('Try updating remember cells total structure.')
+                    self.remember_cells_as_seen(self.REMEMBER_CELLS_STRUCTURE_TOTAL_ID,
+                                                [cell],
+                                                type)
+
+    def increase_remember_cells_stats(self, id, type):
+        """Increments the number of cells for the id and type.
+
+        id: id of the remember cells structure to act upon
+        type: 0 : servings, 1 : neighbours
+        """
+
+        if not type in (0, 1):
+            raise Exception, 'increase_remember_cells_stats() wrong type value (%s).' % type
+
+        if id == self.REMEMBER_CELLS_STRUCTURE_TOTAL_ID:
+            if type == 0:
+                self._nb_remember_servings_total += 1
+            else:
+                self._nb_remember_neighbours_total += 1
+            logging.debug('Total numbers of cells seen are now: %i, %i.' %
+                          (self._nb_remember_servings_total,
+                           self._nb_remember_neighbours_total)
+                          )
+        else:
+            if type == 0:
+                self._nb_remember_servings_in_last_structure += 1
+            else:
+                self._nb_remember_neighbours_in_last_structure += 1
+            logging.debug('Numbers of cells seen in last structure are now: %i, %i.' %
+                          (self._nb_remember_servings_in_last_structure,
+                           self._nb_remember_neighbours_in_last_structure)
+                          )
+
+    def remember_serving_cell_as_seen(self, id, serving):
+        """Remembers having seen the serving cell.
+
+        id: id of the remember cells structure to act upon
+        serving: a list of dictionaries describing cells to remember
+        """
+        self.remember_cells_as_seen(id, serving, 0)
+
+    def remember_neighbour_cells_as_seen(self, id, neighbours):
+        """Remembers having seen the neighbour cells.
+
+        id: id of the remember cells structure to act upon
+        neighbours: a list of dictionaries describing cells to remember
+        """
+        self.remember_cells_as_seen(id, neighbours, 1)
+
+    def set_current_remember_cells_id(self, id):
+        """Sets the current remember cells structure id, creates it if necessary."""
+
+        if not id:
+            logging.error('id:\'%s\' is not valid for a remember cells structure.' % id)
+            return
         
+        logging.debug("Wait for GSM Lock data.")
+        self.acquire_lock()
+        logging.debug("Lock acquired by set_current_remember_cells_id().")
+
+        if id in self._remember_cells_structures:
+            logging.info('id:\'%s\' already existed in remember cells structure.' % id)
+        else:
+            self.create_remember_cells_structure(id)
+
+        self._current_remember_cells_structure_id = id
+        #TODO: you can set an existing id. In that case, you should initialise
+        # the values with the content of the existing structure
+        self._nb_remember_servings_in_last_structure = 0
+        self._nb_remember_neighbours_in_last_structure = 0
+        logging.debug('Remember cells counters for current structure reset to 0.')
+        logging.info('current remember cells structure id set to: %s' % id)
+
+        self.release_lock()
+        logging.debug("Lock released by set_current_remember_cells_id().")
+
+    def get_seen_cells_stats(self):
+        """Returns the number of cells which have been seen.
+
+        Returns a tuple:
+        number of serving cells seen in last remember structure,
+        number of neighbour cells seen in last remember structure,
+        number of serving cells seen since launch,
+        number of neighbour cells seen since launch
+        """
+        logging.debug("Wait for GSM Lock data.")
+        self.acquire_lock()
+        logging.debug("Lock acquired by get_seen_cells_stats(), reading.")
+        res = (self._nb_remember_servings_in_last_structure,
+                self._nb_remember_neighbours_in_last_structure,
+                self._nb_remember_servings_total,
+                self._nb_remember_neighbours_total)
+        self.release_lock()
+        logging.debug("Lock released by get_seen_cells_stats().")
+        return res
+
     def acquire_lock(self):
         """Acquire the lock to prevent state of the GSM variables to be modified."""
         self.lock.acquire()
@@ -1030,6 +1215,7 @@ class ObmLogger():
         if not self._logging:
             logging.info('Logging loop is stopping.')
             self._loggingThread = None
+            self.set_current_remember_cells_structure_id()
         else:
             logging.info('Next logging loop scheduled in %d seconds.' % scanSpeed)
         # storing in 'result' prevents modification of the return value between
@@ -1051,6 +1237,7 @@ class ObmLogger():
         else:
             self._logging = True
             scanSpeed = config.get(config.GENERAL, config.SCAN_SPEED_DEFAULT)
+            self.set_current_remember_cells_structure_id()
             self._loggingThread = gobject.timeout_add_seconds( scanSpeed, self.log )
             logging.info('start_logging: OBM logger scheduled every %i second(s).' % scanSpeed)
         # be sure to notify as soon as possible the views, for better feedback
@@ -1071,6 +1258,16 @@ class ObmLogger():
             self._loggerLock.release()
             logging.debug('OBM logger lock released by stop_logging().')
         
+    def set_current_remember_cells_structure_id(self, id = None):
+        """Sets a new structure to remember cells seen.
+
+        If id is not provided, then tries: YY-mm-DD_HH:MM:SS.
+        """
+        if id == None:
+            self._gsm.set_current_remember_cells_id(datetime.now().strftime("%Y-%m-%d_%H:%M:%S"))
+        else:
+            self._gsm.set_current_remember_cells_id(id)
+
     #===== observable interface =======
     def register(self, observer):
         """Called by observers to be later notified of changes."""
@@ -1101,7 +1298,21 @@ class ObmLogger():
         else:
             logging.debug("MCC unchanged (was '%s', is '%s')" % (self._mcc, currentMcc))
         return result
-        
+
+    def get_seen_cells_stats(self):
+        """Returns the number of cells which have been seen.
+
+        If the logger is on, the last remember structure contains the cells
+        seen while logging, since last 'start'.
+
+        Returns a tuple:
+        number of serving cells seen in last remember structure,
+        number of neighbour cells seen in last remember structure,
+        number of serving cells seen since launch,
+        number of neighbour cells seen since launch
+        """
+        return self._gsm.get_seen_cells_stats()
+
     def get_gps_data(self):
         """Return validity boolean, time stamp, lat, lng, alt, pdop, hdop, vdop, speed in km/h, heading."""
         (valPos, tstamp, lat, lng, alt, pdop, hdop, vdop) = self._gps.get_GPS_data()

@@ -199,7 +199,20 @@ class openBmapGTK:
             self._cidLabel.set_text('%s' % servingCell[3])
             self._ssLabel.set_text('%s' % servingCell[4])
             self._actType.set_text('%s' % servingCell[5])
+
             self._nbNeigCurrentLabel.set_text('%s' % len(neighbourCells))
+            (nbServCurrent,
+             nbNeighCurrent,
+             nbServTotal,
+             nbNeighTotal) = self._obmlogger.get_seen_cells_stats()
+             # we update only if logging is on. This way, when we stop,
+             # we still read meaningful information: the number of cells
+             # seen during last start/stop.
+            if self._obmlogger.is_logging():
+                self._nbServSinceStartLabel.set_text('%s' % nbServCurrent)
+                self._nbNeigSinceStartLabel.set_text('%s' % nbNeighCurrent)
+            self._nbServSinceLaunchLabel.set_text('%s' % nbServTotal)
+            self._nbNeigSinceLaunchLabel.set_text('%s' % nbNeighTotal)
         else:
             for w in [self._gsmLabel, self._gsmLabel2]:
                 w.set_text("N/A")
