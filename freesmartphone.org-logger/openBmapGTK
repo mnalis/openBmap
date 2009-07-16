@@ -178,7 +178,7 @@ class openBmapGTK:
             return True
         else:
             self._obmlogger.exit_openBmap()
-            logging.info('Exiting...')
+            gobject.idle_add( logging.info, 'Exiting...' )
             gobject.idle_add(gtk.main_quit, )
         
     def start_logging(self, widget):
