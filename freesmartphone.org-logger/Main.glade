@@ -902,32 +902,66 @@
                     <property name="visible">True</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <widget class="GtkTable" id="table7">
-                        <property name="visible">True</property>
-                        <property name="n_rows">2</property>
-                        <property name="n_columns">3</property>
+                      <widget class="GtkVBox" id="vboxGPSWithFix">
+                        <property name="orientation">vertical</property>
                         <child>
-                          <widget class="GtkTable" id="table9">
+                          <widget class="GtkTable" id="table7">
                             <property name="visible">True</property>
                             <property name="n_rows">2</property>
-                            <property name="n_columns">2</property>
+                            <property name="n_columns">3</property>
                             <child>
-                              <widget class="GtkLabel" id="labelSpee">
+                              <widget class="GtkTable" id="table9">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Speed (km/h)</property>
-                                <property name="justify">center</property>
+                                <property name="n_rows">2</property>
+                                <property name="n_columns">2</property>
+                                <child>
+                                  <widget class="GtkLabel" id="labelSpee">
+                                    <property name="visible">True</property>
+                                    <property name="label" translatable="yes">Speed (km/h)</property>
+                                    <property name="justify">center</property>
+                                  </widget>
+                                </child>
+                                <child>
+                                  <widget class="GtkLabel" id="labelSpeedValue">
+                                    <property name="visible">True</property>
+                                    <property name="label" translatable="yes">N/A</property>
+                                    <property name="justify">center</property>
+                                    <property name="ellipsize">end</property>
+                                  </widget>
+                                  <packing>
+                                    <property name="top_attach">1</property>
+                                    <property name="bottom_attach">2</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
                               </widget>
                             </child>
                             <child>
-                              <widget class="GtkLabel" id="labelSpeedValue">
+                              <widget class="GtkLabel" id="labelHPVDopsValue">
                                 <property name="visible">True</property>
                                 <property name="label" translatable="yes">N/A</property>
                                 <property name="justify">center</property>
-                                <property name="ellipsize">end</property>
                               </widget>
                               <packing>
-                                <property name="top_attach">1</property>
-                                <property name="bottom_attach">2</property>
+                                <property name="left_attach">2</property>
+                                <property name="right_attach">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="labelHPVDops">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">HPV Dops</property>
+                                <property name="justify">center</property>
+                                <property name="angle">90</property>
+                              </widget>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
                               </packing>
                             </child>
                             <child>
@@ -936,25 +970,104 @@
                             <child>
                               <placeholder/>
                             </child>
-                          </widget>
-                        </child>
-                        <child>
-                          <widget class="GtkLabel" id="labelHPVDopsValue">
-                            <property name="visible">True</property>
-                            <property name="label" translatable="yes">N/A</property>
-                            <property name="justify">center</property>
+                            <child>
+                              <placeholder/>
+                            </child>
                           </widget>
                           <packing>
-                            <property name="left_attach">2</property>
-                            <property name="right_attach">3</property>
+                            <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkLabel" id="labelHPVDops">
+                          <widget class="GtkHBox" id="hbox2">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">HPV Dops</property>
-                            <property name="justify">center</property>
-                            <property name="angle">90</property>
+                            <child>
+                              <widget class="GtkLabel" id="labelLatitude">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Lat :</property>
+                                <property name="justify">center</property>
+                              </widget>
+                              <packing>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="labelLatitudeValue">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">N/A</property>
+                                <property name="justify">center</property>
+                                <property name="ellipsize">end</property>
+                              </widget>
+                              <packing>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="labelLongitude">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Lon :</property>
+                                <property name="justify">center</property>
+                              </widget>
+                              <packing>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="labelLongitudeValue">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">N/A</property>
+                                <property name="justify">center</property>
+                                <property name="ellipsize">end</property>
+                              </widget>
+                              <packing>
+                                <property name="position">3</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="labelAltitude">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">Alt :</property>
+                                <property name="justify">center</property>
+                              </widget>
+                              <packing>
+                                <property name="position">4</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="labelAltitudeValue">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">N/A</property>
+                                <property name="justify">center</property>
+                              </widget>
+                              <packing>
+                                <property name="position">5</property>
+                              </packing>
+                            </child>
+                          </widget>
+                          <packing>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </widget>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkTable" id="tableGPSNoFix">
+                        <property name="visible">True</property>
+                        <property name="n_rows">2</property>
+                        <property name="n_columns">2</property>
+                        <child>
+                          <widget class="GtkLabel" id="label13">
+                            <property name="visible">True</property>
+                            <property name="label" translatable="yes">GPS is ON</property>
+                          </widget>
+                        </child>
+                        <child>
+                          <widget class="GtkLabel" id="label14">
+                            <property name="visible">True</property>
+                            <property name="label" translatable="yes">Waiting for a 3D fix.</property>
                           </widget>
                           <packing>
                             <property name="left_attach">1</property>
@@ -966,79 +1079,6 @@
                         </child>
                         <child>
                           <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                      </widget>
-                      <packing>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <widget class="GtkHBox" id="hbox2">
-                        <property name="visible">True</property>
-                        <child>
-                          <widget class="GtkLabel" id="labelLatitude">
-                            <property name="visible">True</property>
-                            <property name="label" translatable="yes">Lat :</property>
-                            <property name="justify">center</property>
-                          </widget>
-                          <packing>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <widget class="GtkLabel" id="labelLatitudeValue">
-                            <property name="visible">True</property>
-                            <property name="label" translatable="yes">N/A</property>
-                            <property name="justify">center</property>
-                            <property name="ellipsize">end</property>
-                          </widget>
-                          <packing>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <widget class="GtkLabel" id="labelLongitude">
-                            <property name="visible">True</property>
-                            <property name="label" translatable="yes">Lon :</property>
-                            <property name="justify">center</property>
-                          </widget>
-                          <packing>
-                            <property name="position">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <widget class="GtkLabel" id="labelLongitudeValue">
-                            <property name="visible">True</property>
-                            <property name="label" translatable="yes">N/A</property>
-                            <property name="justify">center</property>
-                            <property name="ellipsize">end</property>
-                          </widget>
-                          <packing>
-                            <property name="position">3</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <widget class="GtkLabel" id="labelAltitude">
-                            <property name="visible">True</property>
-                            <property name="label" translatable="yes">Alt :</property>
-                            <property name="justify">center</property>
-                          </widget>
-                          <packing>
-                            <property name="position">4</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <widget class="GtkLabel" id="labelAltitudeValue">
-                            <property name="visible">True</property>
-                            <property name="label" translatable="yes">N/A</property>
-                            <property name="justify">center</property>
-                          </widget>
-                          <packing>
-                            <property name="position">5</property>
-                          </packing>
                         </child>
                       </widget>
                       <packing>
