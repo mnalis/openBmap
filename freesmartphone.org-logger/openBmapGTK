@@ -155,15 +155,15 @@ class openBmapGTK:
         
     def show_menu_window(self, widget):
         self._windowMenu.show()
-        while gtk.events_pending():
-            gtk.main_iteration(False)
+        logging.debug('GUI: shows menu window.')
         self.window.hide()
+        logging.debug('GUI: hides main window.')
 
     def show_main_window(self, widget):
         self.window.show()
-        while gtk.events_pending():
-            gtk.main_iteration(False)
+        logging.debug('GUI: shows main window.')
         self._windowMenu.hide()
+        logging.debug('GUI: hides the menu window.')
 
     def stop_logging(self, widget):
         self._plsWait.text = 'Stopping the logger. Please wait...'
@@ -264,7 +264,12 @@ class openBmapGTK:
             self._LoggingStatusLabel.set_text('OFF')
         else:
             self._LoggingStatusLabel.set_text('ON')
-                
+
+        # a sanity check
+        if (not self.window.get_property('visible')) and (not self._windowMenu.get_property('visible')):
+            logging.error('GUI: both windows are set to invisible! Shows main window.')
+            self.show_main_window(None)
+
     def upload(self, widget):
         """Upload logs to OpenBmap database."""
         if not self.check_credentials():
