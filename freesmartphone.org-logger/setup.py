@@ -2,7 +2,7 @@ from distutils.core import setup
 import glob
     
 setup(name='openbmap-logger',
-        version='0.3.2',
+        version='0.4.0',
         description='GPS and GSM logger for openBmap.',
         author='Onen',
         author_email='onen.om@free.fr',
