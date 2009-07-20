@@ -1,5 +1,32 @@
+Version 0.4.0 (20/07/2009)
+==========================
+* Glade file path not hardcoded anymore.
+ Now tries to look for the file in the script directory, and one
+ above, possibly under share/openBmap. As the usual structure will
+ be [path]/bin/script and [path]/share/openBmap/glade_file. This
+ allows installing the application anywhere using distutils.
+* Application logging level now in config file.
+* New graphical interface.
+* Added new image file to distutils.
+* Added cells seen statistics.
+ Now manages seen cells (servings / neighbours) counters:
+ - total since launch
+ - number of cells since last start (gets updated only when logging)
+* Improve final logging message schedule.
+ When exiting, the last message to log should now be
+ the last one. It was possible before to see the
+ message be printed before the real end of the logging
+ output.
+* GUI: GPS panel switches when fix status changes.
+* FIX: sometimes both windows were invisible.
+
+Version 0.3.3
+=============
+This version number has been used in logs uploaded to the server.
+It was meant as a testing number for version 0.4.0 only.
 
 Version 0.3.2
+=============
 * Logging level of some application messages have been changed.
 * Moved get GPS data after get GSM data, to ease debug.
 * In a loop, time is now limited to get all data necessary.
@@ -8,6 +35,7 @@ Version 0.3.2
 * Expanders set to invisible.
 
 Version 0.3.1 (never officially released)
+=========================================
 * distutils support.
 * Debian package.
 * get_serving_cell_information() added using FSO monitoring interface.
@@ -22,6 +50,7 @@ only on specific situation.
 * Application logging level set to INFO.
 
 Version 0.3.0
+=============
 * Now you can trigger writing logs to a file based on a maximal
 size specified in config file.
 * If logs in memory when exiting, they will be written to disk.
@@ -39,9 +68,11 @@ that is to say, to one country.
 kB (byte) was turned into kb (bit), because turned low case. Now uses kbytes.
 
 Version 0.2.1
+=============
 Bug fix: when signal strength 100, GSM data incorrectly tagged as 'invalid'
 
 Version 0.2.0
+=============
 * Software id and version added in generated logs
 * do not log if in a call
 * GUI added before upload to enter login/password
@@ -52,4 +83,5 @@ the settings of the phone)
 * code for logging neighbour cells added (but deactivated for this release)
 
 Version 0.1
+===========
 Initial version.

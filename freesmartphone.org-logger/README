@@ -1,4 +1,4 @@
-openBmap logger version 0.3.2
+openBmap logger version 0.4.0 (20/07/2009)
 
 SUMMARY:
 ========
@@ -26,6 +26,19 @@ on GSM data
 * get a map of GSM coverage
 * get a map of 2, 2.5, 3G coverage (not yet implemented)
 * ...
+
+WHAT'S NEW SINCE 0.3.3?
+=======================
+* New graphical interface!
+* Glade file path not hardcoded anymore.
+* Application logging level now in config file.
+* Added cells seen statistics.
+* Details in CHANGELOG.
+
+WHAT'S NEW SINCE 0.3.2?
+=======================
+The version number 0.3.3 has been used in logs uploaded to the server.
+It was meant as a testing number for version 0.4.0 only.
 
 WHAT'S NEW SINCE 0.3.0?
 =======================
@@ -88,6 +101,9 @@ depends on the configuration of the phone...).
 to cancel upload).
 * upload of logs.
 * Graphical window proposing to delete all logs already processed.
+* Seen cells (servings / neighbours) counters:
+ - total since launch
+ - number of cells since last start (gets updated only when logging)
 
 MANUAL:
 =======
@@ -97,6 +113,19 @@ Note: The GPS is started as soon as the application is launched.
 And it keeps running if the application is logging or not. This
 is to prevent losing the GPS position if you pause your logging.
 You have to exit the application in order to stop the GPS.
+
+The main window displays data about:
+* GSM
+* GPS
+* GSM statistics
+Seen cells (servings / neighbours) counters:
+ - total since launch
+ - number of cells since last start (gets updated only when logging)
+
+and the status of the logger (running or not). You can find a
+menu button which brings a new window.
+
+This menu window is a grid of buttons:
 
 * A button to start generating logs. Values will be displayed when
 valid. Logs are stored under HOME/.openBmap/Logs by default.
@@ -127,6 +156,8 @@ Warning: you should create an account on realtimeblog.free.fr
 website, and fill a correct login/password in the popup window
 displayed before upload works.
 
+* A button to go back to main screen.
+
 * A button to exit (if logger is active, it will first stop it
 cleanly, and then exit).
 
@@ -143,6 +174,8 @@ openbmap logger default scanning speed (in sec.) = 10
 gps minimal speed for logging (km/h) = 0
 - set a maximal speed for logging
 gps maximal speed for logging (km/h) = 150
+- 'openBmap.log' contains the application logs, sets the level of output
+application logging level (debug, info, warning, error or critical)
 - please do not modify other values, this could prevent the
 logger from working correctly.
 
