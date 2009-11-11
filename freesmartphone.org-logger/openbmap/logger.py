@@ -869,24 +869,6 @@ class ObmLogger():
     
     def write_obm_log(self, date, tstamp, servingCell, lng, lat, alt, spe, heading, hdop, vdop, pdop, neighbourCells):
         """Format and stores in memory given data, possibly triggers writing in log file."""
-        # From Python doc: %f -> The precision determines the number of digits after the decimal point and defaults to 6.
-        # A difference of the sixth digit in lat/long leads to a difference of under a meter of precision.
-        # Maximum error by rounding is 5. GPS precision is at best 10m. 2 x (maxError x error) = 2 x (5 x 1)
-        # introduces an error of 10m! Thus we settle to 9.
-        latLonPrecision = 9
-        # http://gpsd.berlios.de/gpsd.html:
-        # Altitude determination is more sensitive to variability to atmospheric signal lag than latitude/longitude,
-        # and is also subject to errors in the estimation of local mean sea level; base error is 12 meters at 66%
-        # confidence, 23 meters at 95% confidence. Again, this will be multiplied by a vertical dilution of
-        # precision (VDOP).
-        # Altitude is in meter.
-        altitudePrecision = 1
-        # speed is in km/h.
-        speedPrecision = 3
-        # Precision of 2 digits after the decimal point for h/p/v-dop is enough.
-        hvpdopPrecision = 2
-        # heading in decimal degrees
-        headingPrecision = 9
         # log format, for release 0.2.0
         # "<gsm mcc=\"%s\" mnc=\"%s\" lac=\"%s\" id=\"%s\" ss=\"%i\"/>" % servingCell[:5]
         logmsg = "<scan time=\"%s\">" % date + \
@@ -912,18 +894,20 @@ class ObmLogger():
             " c2=\"%i\"" % cell['c2'] + \
             "/>"
             #" ctype=\"%s\"" % cell['ctype'] + \
-        
-        logmsg += "<gps time=\"%s\"" % time.strftime('%Y%m%d%H%M%S', time.gmtime(tstamp)) + \
-        " lng=\"%s\"" % ( ('%.*f' % (latLonPrecision, lng)).rstrip('0').rstrip('.') ) + \
-        " lat=\"%s\"" % ( ('%.*f' % (latLonPrecision, lat)).rstrip('0').rstrip('.') ) + \
-        " alt=\"%s\"" % ( ('%.*f' % (altitudePrecision, alt)).rstrip('0').rstrip('.') ) + \
-        " hdg=\"%s\"" % ( ('%.*f' % (headingPrecision, heading)).rstrip('0').rstrip('.') ) + \
-        " spe=\"%s\"" % ( ('%.*f' % (speedPrecision, spe)).rstrip('0').rstrip('.') ) + \
-        " hdop=\"%s\"" % ( ('%.*f' % (hvpdopPrecision, hdop)).rstrip('0').rstrip('.') ) + \
-        " vdop=\"%s\"" % ( ('%.*f' % (hvpdopPrecision, vdop)).rstrip('0').rstrip('.') ) + \
-        " pdop=\"%s\"" % ( ('%.*f' % (hvpdopPrecision, pdop)).rstrip('0').rstrip('.') ) + \
-        "/>" + \
-        "</scan>\n"
+
+        logmsg += self.format_gps_data_for_xml_log(
+                                                   (True,
+                                                    tstamp,
+                                                    lat,
+                                                    lng,
+                                                    alt,
+                                                    pdop,
+                                                    hdop,
+                                                    vdop,
+                                                    spe,
+                                                    heading)
+                                                   )
+        logmsg += "</scan>\n"
         logging.info(logmsg)
         self.fileToSendLock.acquire()
         logging.info('OpenBmap log file lock acquired.')
@@ -964,6 +948,44 @@ class ObmLogger():
 
         self.fileToSendLock.release()
         logging.info('OpenBmap log file lock released.')
+
+    def format_gps_data_for_xml_log(self, gpsData):
+        """Receives GPS data as parameter, returns an XML formated string for log file.
+
+        gpsData follows the return type of get_gps_data():
+        validity boolean, time stamp, lat, lng, alt, pdop, hdop, vdop, speed in km/h, heading."""
+
+        # From Python doc: %f -> The precision determines the number of digits after the decimal point and defaults to 6.
+        # A difference of the sixth digit in lat/long leads to a difference of under a meter of precision.
+        # Maximum error by rounding is 5. GPS precision is at best 10m. 2 x (maxError x error) = 2 x (5 x 1)
+        # introduces an error of 10m! Thus we settle to 9.
+        latLonPrecision = 9
+        # http://gpsd.berlios.de/gpsd.html:
+        # Altitude determination is more sensitive to variability to atmospheric signal lag than latitude/longitude,
+        # and is also subject to errors in the estimation of local mean sea level; base error is 12 meters at 66%
+        # confidence, 23 meters at 95% confidence. Again, this will be multiplied by a vertical dilution of
+        # precision (VDOP).
+        # Altitude is in meter.
+        altitudePrecision = 1
+        # speed is in km/h.
+        speedPrecision = 3
+        # Precision of 2 digits after the decimal point for h/p/v-dop is enough.
+        hvpdopPrecision = 2
+        # heading in decimal degrees
+        headingPrecision = 9
+
+        return (
+                "<gps time=\"%s\"" % time.strftime('%Y%m%d%H%M%S', time.gmtime(gpsData[1])) + \
+                " lng=\"%s\"" % ( ('%.*f' % (latLonPrecision, gpsData[3])).rstrip('0').rstrip('.') ) + \
+                " lat=\"%s\"" % ( ('%.*f' % (latLonPrecision, gpsData[2])).rstrip('0').rstrip('.') ) + \
+                " alt=\"%s\"" % ( ('%.*f' % (altitudePrecision, gpsData[4])).rstrip('0').rstrip('.') ) + \
+                " hdg=\"%s\"" % ( ('%.*f' % (headingPrecision, gpsData[9])).rstrip('0').rstrip('.') ) + \
+                " spe=\"%s\"" % ( ('%.*f' % (speedPrecision, gpsData[8])).rstrip('0').rstrip('.') ) + \
+                " hdop=\"%s\"" % ( ('%.*f' % (hvpdopPrecision, gpsData[6])).rstrip('0').rstrip('.') ) + \
+                " vdop=\"%s\"" % ( ('%.*f' % (hvpdopPrecision, gpsData[7])).rstrip('0').rstrip('.') ) + \
+                " pdop=\"%s\"" % ( ('%.*f' % (hvpdopPrecision, gpsData[5])).rstrip('0').rstrip('.') ) + \
+                "/>"
+                )
 
     def write_obm_log_to_disk(self):
         """Gets the Lock and then calls write_obm_log_to_disk_unprotected()."""
