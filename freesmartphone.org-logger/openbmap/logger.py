@@ -624,42 +624,10 @@ class Gsm:
         self._observers.append(observer)
     
 class Config:
-    LOG_FILENAME = 'General log file name'
-    LOGGING_LEVEL = 'Logging level'
-    APP_HOME_DIR = os.path.join(os.environ['HOME'], '.openBmap')
-    TEMP_LOG_FILENAME = os.path.join(APP_HOME_DIR,
-                                     'openBmap.log')
-    CONFIGURATION_FILENAME = os.path.join(APP_HOME_DIR,
-                                     'openBmap.conf')
-    XML_LOG_VERSION = 'V2'
-    # For ease of comparison in database, we use ##.##.## format for version:
-    SOFTWARE_VERSION = '00.00.00'
-    
-    def __init__(self):        
-        # strings which will be used in the configuration file
-        self.GENERAL = 'General'
-        self.OBM_LOGS_DIR_NAME = 'OpenBmap logs directory name'
-        self.OBM_PROCESSED_LOGS_DIR_NAME = 'OpenBmap uploaded logs directory name'
-        self.OBM_UPLOAD_URL = 'OpenBmap upload URL'
-        self.OBM_API_CHECK_URL = 'OpenBmap API check URL'
-        self.OBM_API_VERSION = 'OpenBmap API version'
-        self.SCAN_SPEED_DEFAULT = 'OpenBmap logger default scanning speed (in sec.)'
-        self.MIN_SPEED_FOR_LOGGING = 'GPS minimal speed for logging (km/h)'
-        self.MAX_SPEED_FOR_LOGGING = 'GPS maximal speed for logging (km/h)'
-        # NB_OF_LOGS_PER_FILE is considered for writing of log to disk only if MAX_LOGS_FILE_SIZE <= 0
-        self.NB_OF_LOGS_PER_FILE = 'Number of logs per file'
-        # puts sth <=0 to MAX_LOGS_FILE_SIZE to ignore it and let other conditions trigger
-        # the write of the log to disk (e.g. NB_OF_LOGS_PER_FILE)
-        self.MAX_LOGS_FILE_SIZE = 'Maximal size of log files to be uploaded (kbytes)'
-        self.APP_LOGGING_LEVEL = 'Application logging level (debug, info, warning, error, critical)'
-        
-        self.CREDENTIALS = 'Credentials'
-        self.OBM_LOGIN = 'OpenBmap login'
-        self.OBM_PASSWORD = 'OpenBmap password'
-        
+
+    def __init__(self, config_filename):
+        self._configuration_filename = config_filename
         self._config = self.load_config()
-        # TODO: it writes the config file every time! :-(
-        self.save_config()
                 
     def load_config(self):
         """Try loading the configuration file.
@@ -667,86 +635,49 @@ class Config:
         Try to load the configuration file. If it does not exist, the default values
         are loaded, and the configuration file is saved with these default values.
         """
-        logging.debug('Loading configuration file: \'%s\'' % Config.CONFIGURATION_FILENAME)
+        logging.debug('Loading configuration file: \'%s\'' % self._configuration_filename)
         config = ConfigParser.RawConfigParser();
         try:
-            config.readfp(open(self.CONFIGURATION_FILENAME))
+            config.readfp(open(self._configuration_filename))
             logging.debug('Configuration file loaded.')
         except Exception, e:
-                logging.warning("No configuration file found: uses default values")
-                config.add_section(self.GENERAL)
-                #config.set(self.GENERAL, self.CONFIGURATION_FILENAME, 'OpenBmap.conf')
-                #TODO config.set(self.GENERAL, self.LOGGING_LEVEL, 'logging.DEBUG')
-                #TODO config.set(self.GENERAL, self.LOG_FILENAME,
-                #           os.path.join(self.APP_HOME_DIR,
-                #                        'OpenBmap.log'))
-                config.set(self.GENERAL, self.OBM_LOGS_DIR_NAME, 
-                           os.path.join(self.APP_HOME_DIR,
-                                        'Logs'))
-                config.set(self.GENERAL, self.OBM_PROCESSED_LOGS_DIR_NAME, 
-                           os.path.join(self.APP_HOME_DIR,
-                                        'Processed_logs'))
-                config.set(self.GENERAL, self.OBM_UPLOAD_URL, 'http://realtimeblog.free.fr/upload/upl.php5')
-                config.set(self.GENERAL, self.OBM_API_CHECK_URL, 'http://realtimeblog.free.fr/getInterfacesVersion.php')
-                config.set(self.GENERAL, self.OBM_API_VERSION, '2')
-                config.set(self.GENERAL, self.SCAN_SPEED_DEFAULT, 10) # in sec.
-                config.set(self.GENERAL, self.MIN_SPEED_FOR_LOGGING, 0)
-                config.set(self.GENERAL, self.MAX_SPEED_FOR_LOGGING, 150)
-                config.set(self.GENERAL, self.NB_OF_LOGS_PER_FILE, 3)
-                config.set(self.GENERAL, self.MAX_LOGS_FILE_SIZE, 20)
-                config.set(self.GENERAL, self.APP_LOGGING_LEVEL, 'info')
-                
-                config.add_section(self.CREDENTIALS)
-                config.set(self.CREDENTIALS, self.OBM_LOGIN, 'your_login')
-                config.set(self.CREDENTIALS, self.OBM_PASSWORD, 'your_password')
-                           
+                logging.warning("No configuration file found.")
         return config
-        
+
     def get(self, section, option):
-        try:
-            if option in [self.SCAN_SPEED_DEFAULT,
-                          self.MIN_SPEED_FOR_LOGGING,
-                          self.MAX_SPEED_FOR_LOGGING,
-                          self.NB_OF_LOGS_PER_FILE,
-                          self.MAX_LOGS_FILE_SIZE]:
-                return self._config.getint(section, option)
-            elif option in [self.APP_LOGGING_LEVEL]:
-                res = str.upper(self._config.get(section, option))
-                if not res in ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']:
-                    errMsg = 'Application logging level should be one of'\
-                    ' DEBUG, INFO, WARNING, ERROR, CRITICAL.'\
-                    ' Found: %s' % res
-                    logging.error(errMsg)
-                    raise Exception, errMsg
-                else:
-                    return res
-            else:
-                return self._config.get(section, option)
-        except Exception, e:
-            # we cannot find it. Maybe the current config file (old version) did not contain
-            # this entry (newer version of the software)
-            defaultValue = 0
-            if option in [self.MAX_LOGS_FILE_SIZE]:
-                defaultValue = 20
-            elif option in [self.APP_LOGGING_LEVEL]:
-                defaultValue = 'INFO'
-            else:
-                logging.critical("get_option() does not find (%s / %s). This is much probably a bug." % (section, option))
-                logging.critical(str(e))
-                #TODO: well in case this happens, this should be forwarded to Views (GUI) in order to inform the user
-                sys.exit(-1)
-            self._config.set(self.GENERAL, option, defaultValue)
-            logging.info('Option \'%s\' cannot be found. Add it to the config file with default value: %s'
-                         % (option, defaultValue))
-            self.save_config()
-            return defaultValue
+        return self._config.get(section, option)
+
+    def getint(self, section, option):
+        return self._config.getint(section, option)
 
     def set(self, section, option, value):
         self._config.set(section, option, value)
+
+    def set_config_if_not_exist(self, params):
+        """For every value in params, insert it only if it is not already present.
+
+        params is a [ (section, [ (option, value) ] ) ].
+        It saves the config file, if a modification happened.
+        """
+        neededToSave = False
         
+        for s in params:
+            section, tuples = s
+            for t in tuples:
+                if not self._config.has_section(section):
+                    logging.info("Adding section '%s' to config file." % section)
+                    self._config.add_section(section)
+                if not self._config.has_option(section, t[0]):
+                    logging.info("Adding to section '%s' the option '%s' with value '%s' to config file."
+                                 % ( (section,) + t))
+                    self.set(section, *t)
+                    neededToSave = True
+        if neededToSave:
+            self.save_config()
+
     def save_config(self):
-        configFile = open(Config.CONFIGURATION_FILENAME, 'wb')
-        logging.info('Save config file \'%s\'' % Config.CONFIGURATION_FILENAME)
+        configFile = open(self._configuration_filename, 'wb')
+        logging.info('Save config file \'%s\'' % self._configuration_filename)
         self._config.write(configFile)
         configFile.close()        
     
@@ -821,8 +752,78 @@ class Gps:
 class ObmLogger():
     # Lock to access the OBM logs files
     fileToSendLock = threading.Lock()
-    
+    APP_HOME_DIR = os.path.join(os.environ['HOME'], '.openBmap')
+    TEMP_LOG_FILENAME = os.path.join(APP_HOME_DIR,
+                                     'openBmap.log')
+    CONFIGURATION_FILENAME = os.path.join(APP_HOME_DIR,
+                                          'openBmap.conf')
     def __init__(self):
+        self.XML_LOG_VERSION = 'V2'
+        # For ease of comparison in database, we use ##.##.## format for version:
+        self.SOFTWARE_VERSION = '00.00.00'
+        # strings which will be used in the configuration file
+        self.GENERAL = 'General'
+        self.OBM_LOGS_DIR_NAME = 'OpenBmap logs directory name'
+        self.OBM_PROCESSED_LOGS_DIR_NAME = 'OpenBmap uploaded logs directory name'
+        self.OBM_UPLOAD_URL = 'OpenBmap upload URL'
+        self.OBM_API_CHECK_URL = 'OpenBmap API check URL'
+        self.OBM_API_VERSION = 'OpenBmap API version'
+        self.SCAN_SPEED_DEFAULT = 'OpenBmap logger default scanning speed (in sec.)'
+        self.MIN_SPEED_FOR_LOGGING = 'GPS minimal speed for logging (km/h)'
+        self.MAX_SPEED_FOR_LOGGING = 'GPS maximal speed for logging (km/h)'
+        # NB_OF_LOGS_PER_FILE is considered for writing of log to disk only if MAX_LOGS_FILE_SIZE <= 0
+        self.NB_OF_LOGS_PER_FILE = 'Number of logs per file'
+        # puts sth <=0 to MAX_LOGS_FILE_SIZE to ignore it and let other conditions trigger
+        # the write of the log to disk (e.g. NB_OF_LOGS_PER_FILE)
+        self.MAX_LOGS_FILE_SIZE = 'Maximal size of log files to be uploaded (kbytes)'
+        self.APP_LOGGING_LEVEL = 'Application logging level (debug, info, warning, error, critical)'
+
+        self.CREDENTIALS = 'Credentials'
+        self.OBM_LOGIN = 'OpenBmap login'
+        self.OBM_PASSWORD = 'OpenBmap password'
+
+        # set default values if necessary
+        config.set_config_if_not_exist([
+                                        (self.GENERAL,[
+                                                       (self.OBM_LOGS_DIR_NAME,
+                                                        os.path.join(self.APP_HOME_DIR, 'Logs')),
+                                                        (self.OBM_PROCESSED_LOGS_DIR_NAME,
+                                                         os.path.join(self.APP_HOME_DIR, 'Processed_logs')),
+                                                        (self.OBM_UPLOAD_URL,
+                                                         'http://realtimeblog.free.fr/upload/upl.php5'),
+                                                        (self.OBM_API_CHECK_URL,
+                                                         'http://realtimeblog.free.fr/getInterfacesVersion.php'),
+                                                        (self.OBM_API_VERSION,
+                                                         '2'),
+                                                        (self.SCAN_SPEED_DEFAULT,
+                                                         10), # in sec.
+                                                        (self.MIN_SPEED_FOR_LOGGING,
+                                                         0),
+                                                        (self.MAX_SPEED_FOR_LOGGING,
+                                                         150),
+                                                        (self.NB_OF_LOGS_PER_FILE,
+                                                         3),
+                                                        (self.MAX_LOGS_FILE_SIZE,
+                                                         20),
+                                                        (self.APP_LOGGING_LEVEL,
+                                                         'info')
+                                                       ]),
+                                        (self.CREDENTIALS, [
+                                                            (self.OBM_LOGIN,
+                                                             'your_login'),
+                                                            (self.OBM_PASSWORD,
+                                                             'your_password')
+                                                            ])
+                                        ])
+        if not self.validate_configuration():
+            errMsg = "Configuration file could not be validated. See logs for details. Exiting..."
+            logging.critical(errMsg)
+            print errMsg
+            #TODO: well in case this happens, this should be forwarded to Views (GUI) in order to inform the user
+            sys.exit(-1)
+        else:
+            logging.info("Configuration file entries for ObmLogger validated.")
+
         self._gps = Gps()
         self._observers = []
         # is currently logging? Used to tell the thread to stop
@@ -839,10 +840,10 @@ class ObmLogger():
         self._logsInMemoryLengthInByte = 0
         self._logFileHeader = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + \
         "<logfile manufacturer=\"%s\" model=\"%s\" revision=\"%s\" swid=\"FSOnen1\" swver=\"%s\">\n" \
-        % ( self._gsm.get_device_info() + (config.SOFTWARE_VERSION,) )
+        % ( self._gsm.get_device_info() + (self.SOFTWARE_VERSION,) )
         self._logFileTail = '</logfile>'
         
-        logLvl = config.get(config.GENERAL, config.APP_LOGGING_LEVEL)
+        logLvl = self.get_config_value(self.GENERAL, self.APP_LOGGING_LEVEL)
         logLvl = logging.__dict__[logLvl]
         logging.getLogger().setLevel(logLvl)
         logging.info('Application logging level set to %s' % logging.getLevelName(logLvl))
@@ -852,6 +853,54 @@ class ObmLogger():
         if self.DEBUG:
             self.get_gps_data = self.simulate_gps_data
             #self.get_gsm_data = self.simulate_gsm_data
+
+    def validate_configuration(self):
+        """Validates the config values. Returns True uppon success."""
+        section = self.GENERAL
+
+        for option in [self.SCAN_SPEED_DEFAULT,
+                      self.MIN_SPEED_FOR_LOGGING,
+                      self.MAX_SPEED_FOR_LOGGING,
+                      self.NB_OF_LOGS_PER_FILE,
+                      self.MAX_LOGS_FILE_SIZE]:
+            try:
+                self.get_config_value(section, option)
+            except Exception, e:
+                logging.error('Validation of configuration failed for (%s, %s): %s. It should be an integer.' %
+                              (section, option, str(e)) )
+                return False
+
+        try:
+            res = self.get_config_value(section, self.APP_LOGGING_LEVEL)
+            if not res in ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']:
+                logging.error('Application logging level should be one of'\
+                              ' DEBUG, INFO, WARNING, ERROR, CRITICAL.'\
+                              ' Found: %s' % res)
+                return False
+        except Exception, e:
+            logging.error('Validation of configuration failed for (%s, %s): %s.' %
+                              (section, self.APP_LOGGING_LEVEL, str(e)) )
+            return False
+
+        return True
+
+    def get_config_value(self, section, option):
+        """Returns the value, under the expected form (string, int, etc.).
+
+        See validate_configuration() method for expected values format.
+        """
+        if option in [self.SCAN_SPEED_DEFAULT,
+                      self.MIN_SPEED_FOR_LOGGING,
+                      self.MAX_SPEED_FOR_LOGGING,
+                      self.NB_OF_LOGS_PER_FILE,
+                      self.MAX_LOGS_FILE_SIZE]:
+            return config.getint(section, option)
+
+        elif option in [self.APP_LOGGING_LEVEL]:
+            return str.upper(config.get(section, option))
+
+        else:
+            return config.get(section, option)
 
     def request_ressource(self, resource):
         """Requests the given string resource through /org/freesmartphone/Usage."""
@@ -921,7 +970,7 @@ class ObmLogger():
             logging.info('OpenBmap log file lock released.')
             return
 
-        maxLogsFileSize = config.get(config.GENERAL, config.MAX_LOGS_FILE_SIZE) * 1024
+        maxLogsFileSize = self.get_config_value(self.GENERAL, self.MAX_LOGS_FILE_SIZE) * 1024
 
         if ( maxLogsFileSize > 0 ):
             # we use the max log file size as criterium to trigger write of file
@@ -940,9 +989,9 @@ class ObmLogger():
         else:
             self._logsInMemory.append(logmsg)
             self._logsInMemoryLengthInByte += len(logmsg)
-            if len(self._logsInMemory) < config.get(config.GENERAL, config.NB_OF_LOGS_PER_FILE):
+            if len(self._logsInMemory) < self.get_config_value(self.GENERAL, self.NB_OF_LOGS_PER_FILE):
                 logging.debug('Max logs per file (%i/%i) not reached, wait to write to a file.'
-                              % (len(self._logsInMemory), config.get(config.GENERAL, config.NB_OF_LOGS_PER_FILE)))
+                              % (len(self._logsInMemory), self.get_config_value(self.GENERAL, self.NB_OF_LOGS_PER_FILE)))
             else:
                 self.write_obm_log_to_disk_unprotected()
 
@@ -1009,7 +1058,7 @@ class ObmLogger():
         #"yyyyMMddHHmmss"
         date = now.strftime("%Y%m%d%H%M%S")
 
-        logDir = config.get(config.GENERAL, config.OBM_LOGS_DIR_NAME)
+        logDir = self.get_config_value(self.GENERAL, self.OBM_LOGS_DIR_NAME)
         # at the moment: log files follow: logYYYYMMDDhhmmss.xml
         # log format, for release 0.2.0
         # filename = os.path.join(logDir, 'log' + date + '.xml')
@@ -1018,7 +1067,7 @@ class ObmLogger():
         # len('mcc="') = 5
         mcc = mcc[mcc.find("mcc=") + 5 : ]
         mcc = mcc[ : mcc.find('"')]
-        filename = os.path.join(logDir, config.XML_LOG_VERSION + '_' + mcc + '_log' + date + '.xml')
+        filename = os.path.join(logDir, self.XML_LOG_VERSION + '_' + mcc + '_log' + date + '.xml')
         logmsg = self._logFileHeader
         for log in self._logsInMemory:
             logmsg += log
@@ -1047,8 +1096,8 @@ class ObmLogger():
         result = True
         
         # to store the data once sent:
-        dirProcessed = os.path.join(config.get(config.GENERAL, config.OBM_PROCESSED_LOGS_DIR_NAME))
-        logsDir = config.get(config.GENERAL, config.OBM_LOGS_DIR_NAME)
+        dirProcessed = os.path.join(self.get_config_value(self.GENERAL, self.OBM_PROCESSED_LOGS_DIR_NAME))
+        logsDir = self.get_config_value(self.GENERAL, self.OBM_LOGS_DIR_NAME)
         
         self.fileToSendLock.acquire()
         logging.info('OpenBmap log file lock acquired.')
@@ -1064,9 +1113,9 @@ class ObmLogger():
                 fileRead = open(f, 'r')
                 content = fileRead.read()
                 fileRead.close()
-                (status, reason, resRead) = Upload.post_url(config.get(config.GENERAL, config.OBM_UPLOAD_URL),
-                                                            [('openBmap_login', config.get(config.CREDENTIALS, config.OBM_LOGIN)),
-                                                            ('openBmap_passwd', config.get(config.CREDENTIALS, config.OBM_PASSWORD))],
+                (status, reason, resRead) = Upload.post_url(self.get_config_value(self.GENERAL, self.OBM_UPLOAD_URL),
+                                                            [('openBmap_login', self.get_config_value(self.CREDENTIALS, self.OBM_LOGIN)),
+                                                            ('openBmap_passwd', self.get_config_value(self.CREDENTIALS, self.OBM_PASSWORD))],
                                                             [('file', f, content)])
                 logging.debug('Upload response status:%s, reason:%s, body:%s' % (status, reason, resRead))
                 if resRead.startswith('Stored in'):
@@ -1095,7 +1144,7 @@ class ObmLogger():
     def delete_processed_logs(self):
         """Deletes all the files located in the 'processed' folder. Returns number deleted."""
         # no Lock used here, I don't see this needed for Processed logs...
-        dirProcessed = os.path.join(config.get(config.GENERAL, config.OBM_PROCESSED_LOGS_DIR_NAME))
+        dirProcessed = os.path.join(self.get_config_value(self.GENERAL, self.OBM_PROCESSED_LOGS_DIR_NAME))
         deletedSoFar = 0
         for f in os.listdir(dirProcessed):
             toBeDeleted = os.path.join(dirProcessed, f)
@@ -1111,14 +1160,14 @@ class ObmLogger():
             # simulation
             return True
         try:
-            logging.info('We support API version: %s.' % config.get(config.GENERAL, config.OBM_API_VERSION))
-            response = urllib2.urlopen(config.get(config.GENERAL, config.OBM_API_CHECK_URL))
+            logging.info('We support API version: %s.' % self.get_config_value(self.GENERAL, self.OBM_API_VERSION))
+            response = urllib2.urlopen(self.get_config_value(self.GENERAL, self.OBM_API_CHECK_URL))
             for line in response:
                 if line.startswith('MappingManagerVersion='):
                     version_string, val = line.split('=')
                     val = val.strip(' \n')
                     logging.info('Server API version: %s.' % val)
-                    if  val == config.get(config.GENERAL, config.OBM_API_VERSION):
+                    if  val == self.get_config_value(self.GENERAL, self.OBM_API_VERSION):
                         return True
         except Exception, e:
             logging.error(str(e))
@@ -1139,14 +1188,14 @@ class ObmLogger():
         # this is intended to prevent the phone to go to suspend
         self.request_ressource('CPU')
         
-        logDir = config.get(config.GENERAL, config.OBM_LOGS_DIR_NAME)
+        logDir = self.get_config_value(self.GENERAL, self.OBM_LOGS_DIR_NAME)
         if not os.path.exists(logDir):
             logging.info('Directory for storing cell logs does not exists, creating \'%s\'' % 
                          logDir)
             os.mkdir(logDir)
                 
         # to store the data once sent:
-        dirProcessed = os.path.join(config.get(config.GENERAL, config.OBM_PROCESSED_LOGS_DIR_NAME))
+        dirProcessed = os.path.join(self.get_config_value(self.GENERAL, self.OBM_PROCESSED_LOGS_DIR_NAME))
         if not os.path.exists(dirProcessed):
             logging.info('Directory for storing processed cell logs does not exists, creating \'%s\'' % dirProcessed)
             os.mkdir(dirProcessed)
@@ -1168,9 +1217,9 @@ class ObmLogger():
         logging.info("OpenBmap logger runs.")
         self._loggerLock.acquire()
         logging.debug('OBM logger locked by log().')
-        scanSpeed = config.get(config.GENERAL, config.SCAN_SPEED_DEFAULT)
-        minSpeed = config.get(config.GENERAL, config.MIN_SPEED_FOR_LOGGING)
-        maxSpeed = config.get(config.GENERAL, config.MAX_SPEED_FOR_LOGGING)
+        scanSpeed = self.get_config_value(self.GENERAL, self.SCAN_SPEED_DEFAULT)
+        minSpeed = self.get_config_value(self.GENERAL, self.MIN_SPEED_FOR_LOGGING)
+        maxSpeed = self.get_config_value(self.GENERAL, self.MAX_SPEED_FOR_LOGGING)
 
 
         startTime = datetime.now()
@@ -1258,7 +1307,7 @@ class ObmLogger():
             logging.debug('OBM logger is already running.')
         else:
             self._logging = True
-            scanSpeed = config.get(config.GENERAL, config.SCAN_SPEED_DEFAULT)
+            scanSpeed = self.get_config_value(self.GENERAL, self.SCAN_SPEED_DEFAULT)
             self.set_current_remember_cells_structure_id()
             self._loggingThread = gobject.timeout_add_seconds( scanSpeed, self.log )
             logging.info('start_logging: OBM logger scheduled every %i second(s).' % scanSpeed)
@@ -1344,8 +1393,8 @@ class ObmLogger():
     
     def get_credentials(self):
         """Returns openBmap login, password."""
-        return (config.get(config.CREDENTIALS, config.OBM_LOGIN),
-                config.get(config.CREDENTIALS, config.OBM_PASSWORD))
+        return (self.get_config_value(self.CREDENTIALS, self.OBM_LOGIN),
+                self.get_config_value(self.CREDENTIALS, self.OBM_PASSWORD))
 
     def set_credentials(self, login, password):
         """Sets the given login and password, saves the config file."""
@@ -1391,15 +1440,15 @@ class ObmLogger():
 #----------------------------------------------------------------------------#
 dbus.mainloop.glib.DBusGMainLoop( set_as_default=True )
 
-if not os.path.exists(Config.APP_HOME_DIR):
+if not os.path.exists(ObmLogger.APP_HOME_DIR):
     print('Main directory does not exists, creating \'%s\'' % 
                          Config.APP_HOME_DIR)
     os.mkdir(Config.APP_HOME_DIR)
             
-logging.basicConfig(filename=Config.TEMP_LOG_FILENAME,
+logging.basicConfig(filename=ObmLogger.TEMP_LOG_FILENAME,
             level=logging.INFO,
             filemode='w',)
-config = Config()
+config = Config(ObmLogger.CONFIGURATION_FILENAME)
 
 if __name__ == '__main__':
     #obmlogger = ObmLogger()
