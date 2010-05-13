@@ -777,6 +777,7 @@ class ObmLogger():
         # the write of the log to disk (e.g. NB_OF_LOGS_PER_FILE)
         self.MAX_LOGS_FILE_SIZE = 'Maximal size of log files to be uploaded (kbytes)'
         self.APP_LOGGING_LEVEL = 'Application logging level (debug, info, warning, error, critical)'
+        self.LIST_OF_ACTIVE_PLUGINS = 'List of active plugins (try to load them at startup)'
 
         self.CREDENTIALS = 'Credentials'
         self.OBM_LOGIN = 'OpenBmap login'
@@ -806,7 +807,9 @@ class ObmLogger():
                                                         (self.MAX_LOGS_FILE_SIZE,
                                                          20),
                                                         (self.APP_LOGGING_LEVEL,
-                                                         'info')
+                                                         'info'),
+                                                        (self.LIST_OF_ACTIVE_PLUGINS,
+                                                         ['pyiwconfig'])
                                                        ]),
                                         (self.CREDENTIALS, [
                                                             (self.OBM_LOGIN,
@@ -826,9 +829,17 @@ class ObmLogger():
 
         self._gps = Gps()
         self._observers = []
+
+        # Try getting the list of active plugins objects, to be used for scheduling, etc.
+        self._activePluginsList = self.load_active_plugins()
+
         # is currently logging? Used to tell the thread to stop
         self._logging = False
         self._loggingThread = None
+        # This is a list of source ids, such as returned by gobject.idle_add(),
+        # gobject.timeout_add()
+        self._activePluginScheduledIds = []
+
         self._bus = self.init_dbus()
         self._gsm = Gsm(self._bus)
         self._gsm.register(self)
@@ -901,6 +912,10 @@ class ObmLogger():
 
         else:
             return config.get(section, option)
+
+    def get_config(self):
+        """Gets the config object used."""
+        return config
 
     def request_ressource(self, resource):
         """Requests the given string resource through /org/freesmartphone/Usage."""
@@ -1213,6 +1228,21 @@ class ObmLogger():
         * Saves logs in memory if any."""
         self.write_obm_log_to_disk()
 
+    def load_active_plugins(self):
+        """Tries loading active plugins. Returns a list of successfully loaded pluging."""
+        result = []
+        pluginsNames = eval(self.get_config_value(self.GENERAL, self.LIST_OF_ACTIVE_PLUGINS))
+
+        for pluginName in pluginsNames:
+            try:
+                module = __import__("plugins." + (pluginName.lower() + ".")*2, globals(), locals(), [pluginName], -1)
+                result.append(getattr(module, pluginName)(self))
+                logging.info("Module '" + pluginName + "' succesfully loaded.")
+            except Exception, e:
+                logging.error("Error while trying to load plugin '" +
+                              pluginName + "': " + str(e))
+        return result
+
     def log(self):
         logging.info("OpenBmap logger runs.")
         self._loggerLock.acquire()
@@ -1278,7 +1308,7 @@ class ObmLogger():
                               % ((validGsm,) + servingCell) )
                 logging.info("Validity=%s, lng=%f, lat=%f, alt=%f, spe=%f, hdop=%f, vdop=%f, pdop=%f" \
                               % (validGps, lng, lat, alt, spe, hdop, vdop, pdop))
-        
+
             self.notify_observers()
         duration = datetime.now() - startTime
         logging.info("Logging loop ended, total duration: %i sec." % duration.seconds)
@@ -1311,7 +1341,17 @@ class ObmLogger():
             self.set_current_remember_cells_structure_id()
             self._loggingThread = gobject.timeout_add_seconds( scanSpeed, self.log )
             logging.info('start_logging: OBM logger scheduled every %i second(s).' % scanSpeed)
+
+            for plugin in self._activePluginsList:
+                plugin.init()
+                # we add a pair plugin object / scheduled id
+                newEntry = (plugin, gobject.timeout_add_seconds(plugin.get_logging_frequency(),
+                                                                plugin.do_iteration))
+                self._activePluginScheduledIds.append(newEntry)
+                logging.info("Plugin " + plugin.get_id() + " scheduled every " +
+                              str(plugin.get_logging_frequency()) + " second(s).")
         # be sure to notify as soon as possible the views, for better feedback
+
         self.notify_observers()
         self._loggerLock.release()
         logging.debug('OBM logger lock released by start_logging().')
@@ -1326,6 +1366,12 @@ class ObmLogger():
             logging.debug('OBM logger locked by stop_logging().')
             self._logging = False
             logging.info('Requested logger to stop.')
+
+            for plugin, scheduledId in self._activePluginScheduledIds:
+                logging.debug('Unscheduled plugin %s', (plugin.get_id()))
+                gobject.source_remove(scheduledId)
+            self._activePluginScheduledIds = []
+
             self._loggerLock.release()
             logging.debug('OBM logger lock released by stop_logging().')
         
@@ -1404,11 +1450,25 @@ class ObmLogger():
         logging.info('Credentials set to \'%s\', \'%s\'' % (login, password) )
 
     def is_logging(self):
-        """Returns True if the logger is running, False otherwise."""
+        """Returns True if logging plugin(s) is(are) scheduled or working. False otherwise."""
         self._loggerLock.acquire()
         logging.debug('OBM logger locked by is_logging().')
         result = (self._loggingThread != None)
-        logging.debug('Is the logger running? %s' % (result and 'Yes' or 'No') )
+        logging.debug('Is the GSM logger running? %s' % (result and 'Yes' or 'No') )
+        if not result:
+            # GSM plugin is not running
+            if len(self._activePluginScheduledIds) > 0:
+                # we check if plugin(s) is(are) scheduled
+                logging.debug('Plugin(s) are still scheduled.')
+                result = True
+            else:
+                # we check every plugin is not currently working
+                for plugin in self._activePluginsList:
+                    result = plugin.is_working()
+                    logging.debug('Is the plugin %s running? %s' % (plugin.get_id(), result and 'Yes' or 'No') )
+                    if result:
+                        # this plugin is working
+                        break
         self._loggerLock.release()
         logging.debug('OBM logger lock released by is_logging().')
         return result
@@ -1442,8 +1502,8 @@ dbus.mainloop.glib.DBusGMainLoop( set_as_default=True )
 
 if not os.path.exists(ObmLogger.APP_HOME_DIR):
     print('Main directory does not exists, creating \'%s\'' % 
-                         Config.APP_HOME_DIR)
-    os.mkdir(Config.APP_HOME_DIR)
+                         ObmLogger.APP_HOME_DIR)
+    os.mkdir(ObmLogger.APP_HOME_DIR)
             
 logging.basicConfig(filename=ObmLogger.TEMP_LOG_FILENAME,
             level=logging.INFO,
