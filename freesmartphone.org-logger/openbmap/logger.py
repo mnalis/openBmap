@@ -21,12 +21,14 @@ import sys
 import dbus.mainloop.glib
 import time
 from datetime import datetime
+import inspect
 import logging
 import ConfigParser
 import threading
 import os.path
 import urllib2
 import math
+import plugins.obmplugin
 
 # HTTP multi part upload
 import Upload
@@ -757,6 +759,8 @@ class ObmLogger():
                                      'openBmap.log')
     CONFIGURATION_FILENAME = os.path.join(APP_HOME_DIR,
                                           'openBmap.conf')
+    PLUGINS_RELATIVE_PATH = "plugins"
+
     def __init__(self):
         self.XML_LOG_VERSION = 'V2'
         # For ease of comparison in database, we use ##.##.## format for version:
@@ -1235,12 +1239,39 @@ class ObmLogger():
 
         for pluginName in pluginsNames:
             try:
-                module = __import__("plugins." + (pluginName.lower() + ".")*2, globals(), locals(), [pluginName], -1)
+                module = __import__(ObmLogger.PLUGINS_RELATIVE_PATH + "." + (pluginName.lower() + ".")*2, globals(), locals(), [pluginName], -1)
                 result.append(getattr(module, pluginName)(self))
                 logging.info("Module '" + pluginName + "' succesfully loaded.")
             except Exception, e:
                 logging.error("Error while trying to load plugin '" +
                               pluginName + "': " + str(e))
+        return result
+
+    def list_available_plugins(self):
+        """Returns a list of plugins classes which are available for loading."""
+        result = []
+        # gets current real path
+        pluginPath = inspect.getsourcefile(ObmLogger)
+        pluginPath = os.path.dirname(pluginPath)
+        # adds plugins relative path
+        pluginPath = os.path.join(pluginPath, ObmLogger.PLUGINS_RELATIVE_PATH)
+
+        pluginPossibleCandidates = []
+        # every folder in the plugins folder is a possible plugin
+        for entry in os.listdir(pluginPath):
+            if os.path.isdir(os.path.join(pluginPath, entry)):
+                pluginPossibleCandidates.append(entry)
+
+        # filters those which are ObmPlugins
+        parentPluginsClass = plugins.obmplugin.ObmPlugin
+        for entry in pluginPossibleCandidates:
+            try:
+                module = __import__(ObmLogger.PLUGINS_RELATIVE_PATH + ('.' + entry) * 2, globals(), locals(), [entry], -1)
+                candidateClass = module.get_plugin_class()
+                if issubclass(candidateClass, parentPluginsClass):
+                    result.append(candidateClass)
+            except Exception, e:
+                logging.error("Error while trying to load plugin class: %s", (entry,))
         return result
 
     def log(self):
