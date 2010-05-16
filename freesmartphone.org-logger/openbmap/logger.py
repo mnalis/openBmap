@@ -813,7 +813,7 @@ class ObmLogger():
                                                         (self.APP_LOGGING_LEVEL,
                                                          'info'),
                                                         (self.LIST_OF_ACTIVE_PLUGINS,
-                                                         ['pyiwconfig'])
+                                                         [])
                                                        ]),
                                         (self.CREDENTIALS, [
                                                             (self.OBM_LOGIN,
@@ -1235,7 +1235,7 @@ class ObmLogger():
     def load_active_plugins(self):
         """Tries loading active plugins. Returns a list of successfully loaded pluging."""
         result = []
-        pluginsNames = eval(self.get_config_value(self.GENERAL, self.LIST_OF_ACTIVE_PLUGINS))
+        pluginsNames = eval(str(self.get_config_value(self.GENERAL, self.LIST_OF_ACTIVE_PLUGINS)))
 
         for pluginName in pluginsNames:
             try:
@@ -1272,6 +1272,48 @@ class ObmLogger():
                     result.append(candidateClass)
             except Exception, e:
                 logging.error("Error while trying to load plugin class: %s", (entry,))
+        return result
+
+    def set_active_plugins_list(self, pluginsClassesList):
+        """Sets the active plugin list, and load them. Returns (boolean, "Execution String").
+
+        Using the given plugin classes list, it sets the configuration file
+        entry of the active plugin list, and then tries loading them.
+        Returns a tuple of a boolean representing success of the call, and a String
+        of the message associated to the result of the method call.
+        """
+
+        self._loggerLock.acquire()
+        logging.debug('Start setting active plugin list. OBM logger locked.')
+        result = None
+        if self.is_logging(False):
+            result = (False, "Logging must be stopped to modify the active plugin list.")
+        else:
+            newList = []
+            # we remove the duplicates
+            pluginsClassesSet = set(pluginsClassesList)
+
+            for pluginClass in pluginsClassesSet:
+                # we keep only the plugin class name, not the canonical one
+                valueToAppend = str(pluginClass).split('.')[-1]
+                newList.append(valueToAppend)
+            newActiveAlreadyInOldActiveCount = 0
+            for entry in pluginsClassesSet:
+                for activePluginObject in self._activePluginsList:
+                    if isinstance(activePluginObject, entry):
+                        newActiveAlreadyInOldActiveCount += 1
+                        break
+            if newActiveAlreadyInOldActiveCount == len(pluginsClassesSet):
+                result = (True, "No change to plugin active list to be set.")
+            else:
+                result = (True, "Sets new active plugin list: " + str(newList))
+                self.get_config().set(self.GENERAL, self.LIST_OF_ACTIVE_PLUGINS, newList)
+                self.get_config().save_config()
+                self.load_active_plugins()
+        logging.info("Setting active plugin execution %s. %s" %
+                     (result[0] and 'successful' or 'failed', result[1]))
+        self._loggerLock.release()
+        logging.debug('Active plugin list has been set. OBM logger lock released.')
         return result
 
     def log(self):
@@ -1480,10 +1522,14 @@ class ObmLogger():
         config.save_config()
         logging.info('Credentials set to \'%s\', \'%s\'' % (login, password) )
 
-    def is_logging(self):
+    def is_logging(self, synchronised=True):
         """Returns True if logging plugin(s) is(are) scheduled or working. False otherwise."""
-        self._loggerLock.acquire()
-        logging.debug('OBM logger locked by is_logging().')
+        if synchronised:
+            self._loggerLock.acquire()
+            logging.debug('OBM logger locked by is_logging().')
+        else:
+            logging.debug('OBM logger unsynchronised call to is_logging().')
+
         result = (self._loggingThread != None)
         logging.debug('Is the GSM logger running? %s' % (result and 'Yes' or 'No') )
         if not result:
@@ -1500,8 +1546,9 @@ class ObmLogger():
                     if result:
                         # this plugin is working
                         break
-        self._loggerLock.release()
-        logging.debug('OBM logger lock released by is_logging().')
+        if synchronised:
+            self._loggerLock.release()
+            logging.debug('OBM logger lock released by is_logging().')
         return result
     #===== end of observable interface =======
 
