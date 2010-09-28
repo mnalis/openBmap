@@ -12,7 +12,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-class ObmPlugin:
+class ObmPlugin(object):
     """Abstract base class for logging plugins.
 
     Every plugin should extend this abstract class, which contains expected content for a plugin.
