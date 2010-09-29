@@ -221,8 +221,20 @@ class Gsm:
     def get_device_info(self):
         """If available, returns the manufacturer, model and revision."""
         #TODO call the dBus interface only if instance attributes are not set.
-        obj = dbus.SystemBus().get_object('org.freesmartphone.ogsmd', '/org/freesmartphone/GSM/Device')
-        data = dbus.Interface(obj, 'org.freesmartphone.GSM.Device').GetInfo()
+        try:
+            obj = dbus.SystemBus().get_object('org.freesmartphone.ogsmd', '/org/freesmartphone/GSM/Device')
+            data = dbus.Interface(obj, 'org.freesmartphone.Info').GetInfo()
+        except Exception, e1:
+            # API has changed. We try the old location, in case this client
+            # runs on an older API system
+            logging.error(e1)
+            logging.info("Try the old GetInfo API")
+            try:
+                data = dbus.Interface(obj, 'org.freesmartphone.GSM.Device').GetInfo()
+            except Exception, e2:
+                logging.error(e2)
+                data = []
+
         if 'manufacturer' in data:
             # At the moment the returned string starts and ends with '"' for model and revision
             self._manufacturer = data['manufacturer'].strip('"')
