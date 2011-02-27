@@ -843,6 +843,11 @@ class ObmLogger():
         else:
             logging.info("Configuration file entries for ObmLogger validated.")
 
+        if not os.path.exists(ObmLogger.APP_HOME_DIR):
+            print('Main directory does not exists, creating \'%s\'' %
+                  ObmLogger.APP_HOME_DIR)
+            os.mkdir(ObmLogger.APP_HOME_DIR)
+
         self._gps = Gps()
         self._observers = []
 
@@ -1071,11 +1076,11 @@ class ObmLogger():
         """Gets the Lock and then calls write_obm_log_to_disk_unprotected()."""
         self.fileToSendLock.acquire()
         logging.info('OpenBmap log file lock acquired by write_obm_log_to_disk().')
-        self.write_obm_log_to_disk_unprotected()
+        self.write_gsm_log_to_disk_unprotected()
         self.fileToSendLock.release()
         logging.info('OpenBmap log file lock released by write_obm_log_to_disk().')
 
-    def write_obm_log_to_disk_unprotected(self):
+    def write_gsm_log_to_disk_unprotected(self):
         """Takes the logs already formatted in memory and write them to disk. Clears the log in memory.
 
         Warning: this method is not protected by a Lock!
@@ -1090,6 +1095,10 @@ class ObmLogger():
         date = now.strftime("%Y%m%d%H%M%S")
 
         logDir = self.get_config_value(self.GENERAL, self.OBM_LOGS_DIR_NAME)
+        logDir = os.path.join(logDir, "FSO_GSM")
+        if (not os.path.exists(logDir)):
+            os.mkdir(logDir)
+
         # at the moment: log files follow: logYYYYMMDDhhmmss.xml
         # log format, for release 0.2.0
         # filename = os.path.join(logDir, 'log' + date + '.xml')
@@ -1113,7 +1122,28 @@ class ObmLogger():
             self._logsInMemoryLengthInByte = 0
         except Exception, e:
             logging.error("Error while writing GSM/GPS log to file: %s" % str(e))
+
+    def write_generic_log_file_to_disk(self, plugin_name, file_name, content):
+        """Generic method to write given content, into corresponding path and file.
         
+        Corresponding path is: applicaton_log_dir/plugin_name/.
+        """
+        if ((content == None) or (len(content) <= 0)):
+            logging.error("Tried writing an empty log to disk")
+        elif ((file_name == None) or (len(file_name) <= 0)):
+            logging.error("path and log filename are missing")
+        else:
+            logDir = self.get_config_value(self.GENERAL, self.OBM_LOGS_DIR_NAME)
+            absolute_filename = os.path.join(logDir, plugin_name)
+            absolute_filename = os.path.join(absolute_filename, file_name)
+            try:
+                targetFile = open(absolute_filename, 'w')
+                targetFile.write(content)
+                targetFile.close()
+                logging.info("writen '%s' targetFile on disk", absolute_filename)
+            except Exception, e:
+                logging.error("Error while writing generic log targetFile to disk: %s" % str(e))
+
     def send_logs(self):
         """Try uploading available log files to OBM database.
         
@@ -1254,6 +1284,15 @@ class ObmLogger():
                 module = __import__(ObmLogger.PLUGINS_RELATIVE_PATH + "." + (pluginName.lower() + ".")*2, globals(), locals(), [pluginName], -1)
                 result.append(getattr(module, pluginName)(self))
                 logging.info("Module '" + pluginName + "' succesfully loaded.")
+                # check for logging files directories
+                logsDir = self.get_config_value(self.GENERAL, self.OBM_LOGS_DIR_NAME)
+                logsDir = os.path.join(logsDir, pluginName)
+                if (not os.path.exists(logsDir)):
+                    os.mkdir(logsDir)
+                logsDir = self.get_config_value(self.GENERAL, self.OBM_PROCESSED_LOGS_DIR_NAME)
+                logsDir = os.path.join(logsDir, pluginName)
+                if (not os.path.exists(logsDir)):
+                    os.mkdir(logsDir)
             except Exception, e:
                 logging.error("Error while trying to load plugin '" +
                               pluginName + "': " + str(e))
