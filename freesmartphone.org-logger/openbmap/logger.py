@@ -1131,7 +1131,7 @@ class ObmLogger():
                     logging.info('File \'%s\' probably already uploaded. Moved to \'%s\'. Thanks for contributing!' %
                                  (f, newName))
                 else:
-                    logging.error('Unable to upload file \'%s\'.' % f)
+                    logging.error('Unable to upload file \'%s\'. Err: %d/%s: %s' % (f, status, reason, resRead))
                     result = False
         except Exception, e:
             logging.error("Error while sending GSM/GPS logged data: %s" % str(e))
