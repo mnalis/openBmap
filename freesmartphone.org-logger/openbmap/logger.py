@@ -88,6 +88,22 @@ class Gsm:
             self._gsmCallIface = dbus.Interface( bus.get_object('org.freesmartphone.ogsmd', '/org/freesmartphone/GSM/Device'),
                                                        "org.freesmartphone.GSM.Call" )
 
+    def get_hex (self, number):
+        """ gets a number (which is probably hex string, but might be integer already) and returns it as integer
+        """
+        result = 0
+        try:
+            if type(number) == dbus.Int32:
+                result = number
+            else:
+                result = int(number, 16)
+                
+        except Exception, e:
+            logging.error('exception converting hex number: %s, input type is %s' % (str(e), type(number)))
+
+        return result
+        
+    
     def call_status_handler(self, data, *args, **kwargs):
         """This maps to org.freesmartphone.GSM.Call.CallStatus.
         """
@@ -147,8 +163,8 @@ class Gsm:
                 self._MNC = (str(data['code'])[3:]).lstrip('0')
                 self._networkAccessType = data['act']
                 # lac and cid are hexadecimal strings
-                self._lac = str(int(data["lac"], 16))
-                self._cid = str(int(data["cid"], 16))
+                self._lac = str(self.get_hex(data["lac"]))
+                self._cid = str(self.get_hex(data["cid"]))
                 # The signal strength in percent (0-100) is returned.
                 # Mickey pointed out (see dev mailing list archive):
                 # in module ogsmd.gsm.const:
@@ -282,10 +298,10 @@ class Gsm:
             
             logging.debug( 'Raw data serving cell: %s' % data)
             
-            if 'cid' in data and int(data['cid'], 16) == 0:
+            if 'cid' in data and self.get_hex(data['cid']) == 0:
                 # I have seen cid of 0. This does not make sense?
                 logging.info('Serving cell with cell id of 0 discarded.')
-            elif 'lac' in data and int(data['lac'], 16) == 0:
+            elif 'lac' in data and self.get_hex(data['lac']) == 0:
                 # Not sure if I have seen lac of 0. This does not make sense? In case of...
                 logging.info('Serving cell with lac of 0 discarded.')
             elif ('rxlev' in data) and (data['rxlev'] == 0):
@@ -302,8 +318,8 @@ class Gsm:
 
                 if "lac" in data and "cid" in data:
                     # lac and cid are hexadecimal strings
-                    result['lac'] = str(int(data["lac"], 16))
-                    result['cid'] = str(int(data["cid"], 16))
+                    result['lac'] = str(self.get_hex(data["lac"]))
+                    result['cid'] = str(self.get_hex(data["cid"]))
                 else:
                     logging.warning('Either lac or cid is missing in serving cell information.')
                     result.clear()
@@ -330,8 +346,8 @@ class Gsm:
                 if "lac" and "cid" in cell:
                     # lac and cid are hexadecimal strings
                     result = {}
-                    result['lac'] = str(int(cell["lac"], 16))
-                    result['cid'] = str(int(cell["cid"], 16))
+                    result['lac'] = str(self.get_hex(cell["lac"]))
+                    result['cid'] = str(self.get_hex(cell["cid"]))
                     # The signal strength in percent (0-100) is returned.
                     # The following comments were about the signal strength (see GetStatus):
                         # Mickey pointed out (see dev mailing list archive):
