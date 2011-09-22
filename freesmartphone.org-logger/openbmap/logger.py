@@ -236,7 +236,10 @@ class Gsm:
         """If available, returns the manufacturer, model and revision."""
         #TODO call the dBus interface only if instance attributes are not set.
         obj = dbus.SystemBus().get_object('org.freesmartphone.ogsmd', '/org/freesmartphone/GSM/Device')
-        data = dbus.Interface(obj, 'org.freesmartphone.GSM.Device').GetInfo()
+	try:
+            data = dbus.Interface(obj, 'org.freesmartphone.GSM.Device').GetInfo()
+	except:
+            data = dbus.Interface(obj, 'org.freesmartphone.Info').GetInfo()
         if 'manufacturer' in data:
             # At the moment the returned string starts and ends with '"' for model and revision
             self._manufacturer = data['manufacturer'].strip('"')
