@@ -42,6 +42,7 @@ class Gsm:
         self._lac = -1
         self._cid = -1
         self._strength = -1
+        self._arfcn = ''
         self._networkAccessType = ''
         self._MCC = ''
         self._MNC = ''
@@ -315,7 +316,7 @@ class Gsm:
                 # rxlev      Received Field Strength      (rxlev/2)+2 gives the AT+CSQ response value 
                 # The best answer I could get was: no idea if this is correct.
                 # Thus we keep the values as unmodified as possible.
-                for key in ['rxlev', 'tav']:
+                for key in ['rxlev', 'tav', 'arfcn']:
                     if key in data:
                         result[key] = data[key]
 
@@ -338,7 +339,7 @@ class Gsm:
         """Returns a tuple of dictionaries, one for each cell.
         
         Each dictionary contains lac and cid fields.
-        They may contain rxlev, c1, c2, and ctype.
+        They may contain rxlev, c1, c2, ctype and arfcn.
         Maximal timeout is 0.8 second.
         """
         results = []
@@ -372,6 +373,8 @@ class Gsm:
                         # Thus we keep the values as unmodified as possible.
                     if 'rxlev' in cell:
                         result['rxlev'] = cell['rxlev']
+                    if 'arfcn' in cell:
+                        result['arfcn'] = cell['arfcn']
                     if 'c1' in cell:
                         result['c1'] = cell['c1']
                     if 'c2' in cell:
@@ -406,21 +409,22 @@ class Gsm:
         Timing advance and rxlev may be emtpy.
         
         Each neighbour cell dictionary contains lac and cid fields.
-        They may contain rxlev, c1, c2, and ctype.
+        They may contain rxlev, c1, c2, ctype and arfcn.
         """
         logging.debug("Wait for reading GSM data.")
         self.acquire_lock()
         logging.debug("Lock acquired, reading GSM data.")
         (valid, mcc, mnc, lac, cid, strength, act) = (self.check_GSM(),
-                                                      self._MCC,
-                                                      self._MNC,
-                                                      self._lac,
-                                                      self._cid,
-                                                      self._strength,
-                                                      self._networkAccessType)
+                                                   	    self._MCC,
+                                                  	    self._MNC,
+                                                  	    self._lac,
+                                                    	    self._cid,
+                                                      	    self._strength,
+                                                      	    self._networkAccessType)
         neighbourCells = ()
         tav = ''
         rxlev = ''
+        arfcn = ''
         # this is deactivated for release 0.2.0
         # and re-activated for release 0.3.0
         if valid: 
@@ -440,15 +444,18 @@ class Gsm:
                 if 'rxlev' in servingInfo:
                     rxlev = str(servingInfo['rxlev'])
 
+                if 'arfcn' in servingInfo:
+                    arfcn = str(servingInfo['arfcn'])
+
             self.remember_neighbour_cells_as_seen(self._current_remember_cells_structure_id,
                                                   neighbourCells)
 
-        logging.info("valid=%s, MCC=%s, MNC=%s, lac=%s, cid=%s, strength=%s, act=%s, tav=%s, rxlev=%s" %
-             (valid, mcc, mnc, lac, cid, strength, act, tav, rxlev))
+        logging.info("valid=%s, MCC=%s, MNC=%s, lac=%s, cid=%s, strength=%s, act=%s, tav=%s, rxlev=%s arfcn=%s" %
+             (valid, mcc, mnc, lac, cid, strength, act, tav, rxlev, arfcn))
 
         self.release_lock()
         logging.debug("GSM data read, lock released.")
-        return (valid, (mcc, mnc, lac, cid, strength, act, tav, rxlev), neighbourCells )
+        return (valid, (mcc, mnc, lac, cid, strength, act, tav, rxlev, arfcn), neighbourCells )
     
     def get_status(self):
         """Get GSM status.
@@ -949,6 +956,10 @@ class ObmLogger():
             logmsg += " rxlev=\"%s\"" % servingCell[7]
         else:
             logging.debug("No rxlev available for serving cell, skip it.")
+        if servingCell[8] != "":
+            logmsg += " arfcn=\"%s\"" % servingCell[8]
+        else:
+            logging.debug("No arfcn available for serving cell, skip it.")
         logmsg += "/>"
          
         
@@ -958,6 +969,7 @@ class ObmLogger():
             logmsg += "<gsmneighbour mcc=\"%s\" mnc=\"%s\" lac=\"%s\"" % (servingCell[:2] + (cell['lac'],)) +\
             " id=\"%s\"" % cell['cid'] + \
             " rxlev=\"%i\"" % cell['rxlev'] + \
+            " arfcn=\"%i\"" % cell['arfcn'] + \
             " c1=\"%i\"" % cell['c1'] + \
             " c2=\"%i\"" % cell['c2'] + \
             "/>"
@@ -1293,7 +1305,7 @@ class ObmLogger():
                                    neighbourCells)
             else:
                 logging.info('Data were not valid for creating openBmap log.')
-                logging.info("Validity=%s, MCC=%s, MNC=%s, lac=%s, cid=%s, strength=%i, act=%s, tav=%s, rxlev=%s"
+                logging.info("Validity=%s, MCC=%s, MNC=%s, lac=%s, cid=%s, strength=%i, act=%s, tav=%s, rxlev=%s, arfcn=%s"
                               % ((validGsm,) + servingCell) )
                 logging.info("Validity=%s, lng=%f, lat=%f, alt=%f, spe=%f, hdop=%f, vdop=%f, pdop=%f" \
                               % (validGps, lng, lat, alt, spe, hdop, vdop, pdop))
@@ -1372,7 +1384,7 @@ class ObmLogger():
         """Returns Fields validity boolean, MCC, MNC, lac, cid, signal strength, tuple of neighbour cells dictionaries.
         
         Each neighbour cell dictionary contains lac and cid fields.
-        They may contain rxlev, c1, c2, and ctype.
+        They may contain rxlev, c1, c2, ctype and arfcn.
         If MCC has changed, triggers writing of log file.
         """
         
@@ -1452,6 +1464,7 @@ class ObmLogger():
                                                                'rxlev':456,
                                                                'c1':-123,
                                                                'c2':-234,
+                                                               'arfcn':73,
                                                                'ctype':'GSM'}))
         
 #----------------------------------------------------------------------------#
