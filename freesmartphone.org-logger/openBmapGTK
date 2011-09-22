@@ -333,9 +333,20 @@ class openBmapGTK:
         labelPassword = gtk.Label('Password:')
         entryPassword = gtk.Entry(0)
         entryPassword.set_text(password)
+        entryPassword.set_visibility(0)
+
+        context = labelLogin.get_pango_context()
+        font = context.get_font_description()
+        font.set_size(int(font.get_size() * 2))
+        self._biggerLabels = [ labelLogin, entryLogin, labelPassword ]
+        for l in self._biggerLabels:
+            l.modify_font(font)
+
         widgetsTuple = labelLogin, entryLogin, labelPassword, entryPassword
         for w in widgetsTuple:
             dialog.vbox.add(w)
+        dialog.set_border_width(20)
+        dialog.fullscreen()
         dialog.show_all()
 
         if dialog.run() == gtk.RESPONSE_ACCEPT:
