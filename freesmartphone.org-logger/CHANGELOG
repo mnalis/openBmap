@@ -1,3 +1,7 @@
+Version 0.4.1 (22/09/2011)
+==========================
+FIXME -- not released yet, see GIT history since 22ddea890b8cb8b52bd69383c9e9202f2dad75b9
+
 Version 0.4.0 (20/07/2009)
 ==========================
 * Glade file path not hardcoded anymore.

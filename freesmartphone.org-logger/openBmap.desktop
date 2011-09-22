@@ -2,7 +2,7 @@
 Name=OBM
 Comment=Logs GSM and GPS and uploads to openBmap.
 Encoding=UTF-8
-Version=0.4.0
+Version=0.4.1
 Type=Application
 Exec=openBmapGTK
 Icon=openBmap-desktop
