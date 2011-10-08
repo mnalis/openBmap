@@ -1,4 +1,4 @@
-.PHONY: all dist force-dist release builddist shr-testing-2011.1 clean updateversion checkdistversion
+.PHONY: all dist force-dist release builddist shr-t-ipk clean updateversion checkdistversion
 
 all: dist clean
 
@@ -14,14 +14,17 @@ force-dist: clean updateversion builddist
 
 release: updateversion checkdistversion
 
-builddist: shr-testing-2011.1
-
-shr-testing-2011.1:
-	echo FIXME build shr
-
 clean:
 	python setup.py clean
 	rm -rf build tmp
+
+# you should never run targets below this line manually
+
+builddist: shr-t-ipk
+
+shr-t-ipk:
+	echo FIXME build shr-T .IPK
+
 
 updateversion:
 	@sed -ne '1s,^Version \(.*\) (.*$$,\1,p' CHANGELOG > VERSION
