@@ -792,7 +792,7 @@ class ObmLogger():
     def __init__(self):
         self.XML_LOG_VERSION = 'V2'
         # For ease of comparison in database, we use ##.##.## format for version:
-        self.SOFTWARE_VERSION = '00.00.00'
+        self.SOFTWARE_VERSION = '0.4.1'
         # strings which will be used in the configuration file
         self.GENERAL = 'General'
         self.OBM_LOGS_DIR_NAME = 'OpenBmap logs directory name'
