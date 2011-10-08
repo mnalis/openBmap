@@ -7,7 +7,7 @@ setup(name='openbmap-logger',
         author='Onen',
         author_email='onen.om@free.fr',
         url='http://www.openbmap.org',
-        download_url='http://sourceforge.net/project/showfiles.php?group_id=218065&package_id=310952',
+        download_url='http://sourceforge.net/projects/myposition/files/openBmap%20Freesmartphone.org%20client/',
         classifiers=[
             'Development Status :: 5 - Production/Stable',
             'Environment :: X11 Applications :: GTK',
