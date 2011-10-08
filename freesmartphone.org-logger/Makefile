@@ -9,7 +9,7 @@ dist: clean release builddist
 	
 force-dist: clean updateversion builddist
 	@echo
-	@echo "WARNING: not checking odd/even version for build (devel only!) - version `cat VERSION`"
+	@echo "WARNING: not checking odd/even version for build (devel only!) - version `cat VERSION` (Branch `cat VERSIONB`)"
 	@echo
 
 release: updateversion checkdistversion
@@ -46,7 +46,7 @@ shr-t-ipk:
 	echo "Architecture: all" >> tmp/root/DEBIAN/control
 	echo "OE: openbmap-logger" >> tmp/root/DEBIAN/control
 	echo "Homepage: http://www.openbmap.org/" >> tmp/root/DEBIAN/control
-	echo "Build: `git branch -v | sed -ne 's,^\* \([^ ]*\)  *\([a-f0-9]*\) .*$$,\1/\2,p'`" >> tmp/root/DEBIAN/control
+	echo "Build: `cat VERSIONB`" >> tmp/root/DEBIAN/control
 	echo "Depends: python, python-dbus, python-pygobject, python-pygtk, libglade-2.0-0, python-subprocess, python-netclient, python-math, python-core, python-io, frameworkd" >> tmp/root/DEBIAN/control
 	echo "Source: http://sourceforge.net/projects/myposition/files/openBmap%20Freesmartphone.org%20client/`cat VERSION`/openbmap-logger-`cat VERSION`.tar.gz" >> tmp/root/DEBIAN/control
 
@@ -55,6 +55,7 @@ shr-t-ipk:
 
 updateversion:
 	@sed -ne '1s,^Version \(.*\) (.*$$,\1,p' CHANGELOG > VERSION
+	@git branch -v | sed -ne 's,^\* \([^ ]*\)  *\([a-f0-9]*\) .*$$,\1/\2,p' > VERSIONB
 	@grep -q  '^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$$' VERSION || (echo "ERROR: Can't detect correct version from CHANGELOG: `cat VERSION`"; exit 1)
 	sed -i -e "s/self.SOFTWARE_VERSION = '.*'/self.SOFTWARE_VERSION = '`cat VERSION`'/" openbmap/logger.py
 	sed -i -e "s/version='.*',/version='`cat VERSION`',/" setup.py
@@ -64,6 +65,6 @@ checkdistversion:
 	@VERSION=`cat VERSION` ; [ $$(( $${VERSION##*.} %2 )) -eq 0 ] || (echo "ERROR: odd version number indicates development, aborting release build! Use force-dist for devel"; exit 2)
 	@README=`sed -ne "1s/^openBmap logger version \(.*\) (.*/\1/p" README`; VERSION=`cat VERSION`; [ "$$README" = "$$VERSION" ] || (echo "ERROR: versions mismatch: README says $$README, CHANGELOG says $$VERSION"; exit 3)
 	@echo
-	@echo "Versions $$VERSION OK, don't forget to commit auto-modified code to git and 'git tag' release!"
+	@echo "Versions $$VERSION (Branch `cat VERSIONB`) OK, don't forget to commit auto-modified code to git and 'git tag' release!"
 	@echo
 	
