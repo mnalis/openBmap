@@ -32,6 +32,7 @@ updateversion:
 	sed -i -e "s/self.SOFTWARE_VERSION = '.*'/self.SOFTWARE_VERSION = '`cat VERSION`'/" openbmap/logger.py
 	sed -i -e "s/version='.*',/version='`cat VERSION`',/" setup.py
 	sed -i -e "s/Version=.*/Version=`cat VERSION`/" openBmap.desktop
+	sed -i -e "s/Version: .*/Version: `cat VERSION`/" PKG-INFO
 
 checkdistversion:
 	@VERSION=`cat VERSION` ; [ $$(( $${VERSION##*.} %2 )) -eq 0 ] || (echo "ERROR: odd version number indicates development, aborting release build! Use force-dist for devel"; exit 2)
