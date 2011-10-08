@@ -1,2 +1,9 @@
 *~
 *.pyc
+*.pyo
+build/
+dist/
+MANIFEST
+VERSION
+VERSIONB
+tmp/

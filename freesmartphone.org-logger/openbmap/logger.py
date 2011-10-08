@@ -2,6 +2,7 @@
 
 # Copyright 2008, 2009 Ronan DANIELLOU
 # Copyright 2008, 2009 Onen (onen.om@free.fr)
+# Copyright 2011 Matija Nalis (mnalis-openmoko@voyager.hr)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -799,7 +800,7 @@ class ObmLogger():
     def __init__(self):
         self.XML_LOG_VERSION = 'V2'
         # For ease of comparison in database, we use ##.##.## format for version:
-        self.SOFTWARE_VERSION = '00.00.00'
+        self.SOFTWARE_VERSION = '0.4.1'
         # strings which will be used in the configuration file
         self.GENERAL = 'General'
         self.OBM_LOGS_DIR_NAME = 'OpenBmap logs directory name'
