@@ -50,7 +50,7 @@ shr-t-ipk:
 	echo "Depends: python, python-dbus, python-pygobject, python-pygtk, libglade-2.0-0, python-subprocess, python-netclient, python-math, python-core, python-io, frameworkd" >> tmp/root/DEBIAN/control
 	echo "Source: http://sourceforge.net/projects/myposition/files/openBmap%20Freesmartphone.org%20client/`cat VERSION`/openbmap-logger-`cat VERSION`.tar.gz" >> tmp/root/DEBIAN/control
 
-	dpkg-deb --build tmp/root dist/openbmap-logger_`cat VERSION`-r1.0_all.ipk
+	fakeroot dpkg-deb --build tmp/root dist/openbmap-logger_`cat VERSION`-r1.0_all.ipk
 
 
 updateversion:
