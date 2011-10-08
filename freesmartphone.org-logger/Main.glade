@@ -1322,6 +1322,8 @@
     </child>
   </widget>
   <widget class="GtkWindow" id="windowMenu">
+    <property name="width_request">480</property>
+    <property name="height_request">640</property>
     <child>
       <widget class="GtkTable" id="table1">
         <property name="visible">True</property>
