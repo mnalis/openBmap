@@ -1,6 +1,4 @@
-.PHONY: all dist force-dist release clean distclean builddist source shr-t-ipk updateversion checkdistversion 
-
-all: dist clean
+.PHONY: dist force-dist release clean distclean builddist source shr-t-ipk updateversion checkdistversion 
 
 dist: clean release builddist
 	@echo 
@@ -17,6 +15,8 @@ release: updateversion checkdistversion
 clean:
 	python setup.py clean --all
 	rm -rf build tmp
+	rm -f *~ openbmap/*~ openbmap/plugins/*~
+	rm -f openbmap/*.py[oc] openbmap/plugins/*.py[oc]
 	
 distclean: clean
 	rm -rf dist	
