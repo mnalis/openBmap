@@ -1,0 +1,6 @@
+usr/lib/python2.*
+usr/share/applications
+usr/share/pixmaps
+usr/share/openBmap/*.png
+usr/share/openBmap/*.glade
+usr/bin

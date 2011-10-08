@@ -1,0 +1,30 @@
+Source: openbmap-logger
+Section: misc
+Priority: optional
+Maintainer: Debian freesmartphone.org Team <pkg-fso-maint@lists.alioth.debian.org>
+Uploaders: Sebastian Reichel <elektranox@gmail.com>
+DM-Upload-Allowed: yes
+Build-Depends: cdbs (>= 0.4.49),
+               debhelper (>= 7),
+               python-all (>= 2.5),
+               python-support (>= 0.5.3)
+Standards-Version: 3.8.3
+Homepage: http://www.openbmap.org
+
+Package: openbmap-logger
+Architecture: all
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         ${python:Depends},
+         python-gtk2,
+         python-glade2,
+         fso-frameworkd
+Description: gsm/gps-data logger for the openBmap project
+ OpenBmap is a free and open map of wireless communicating objects
+ (e.g. cellular antenna, Wi-Fi, Bluetooth). It provides tools to
+ mutualize data, create and access this map. 
+ .
+ The purpose of this software is to log GSM data, together with
+ GPS coordinate. The result can be sent to their website, in
+ order to build a free database. They store GPS quality, speed,
+ GSM signal strength, etc. to keep a high quality of data.

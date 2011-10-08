@@ -1,0 +1,3 @@
+# uscan file
+version=3
+http://sf.net/myposition/openbmap-logger-([\d\.]+)\.tar\.gz

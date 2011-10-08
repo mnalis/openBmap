@@ -1,0 +1,2 @@
+?package(openbmap-logger):needs="X11" section="Applications/Science/Geoscience"\
+  title="openBmap" command="/usr/bin/openBmapGTK"

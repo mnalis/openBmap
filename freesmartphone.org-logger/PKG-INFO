@@ -1,0 +1,18 @@
+Metadata-Version: 1.0
+Name: openbmap-logger
+Version: 0.4.0
+Summary: GPS and GSM logger for openBmap.
+Home-page: http://www.openbmap.org
+Author: Onen
+Author-email: onen.om@free.fr
+License: UNKNOWN
+Download-URL: http://sourceforge.net/project/showfiles.php?group_id=218065&package_id=310952
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: X11 Applications :: GTK
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: License :: OSI Approved :: GNU General Public License (GPL)
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python
+Classifier: Topic :: Scientific/Engineering :: GIS
