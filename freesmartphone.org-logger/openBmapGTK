@@ -31,6 +31,7 @@ except:
 import logging
 import gobject
 import os.path
+import time
 
 import openbmap.logger
 
@@ -73,6 +74,7 @@ class openBmapGTK:
         self._gsmLabel2 = self.wTree.get_widget('displayCidStrength')
         self._gpsPositionLabel = self.wTree.get_widget('displayGpsPosition')
         self._gpsAltitudeLabel = self.wTree.get_widget('displayGpsAlt')
+        self._gpsTimeLabel = self.wTree.get_widget('displayGpsTime')
         self._dops = self.wTree.get_widget('displayDops')
         self._speed = self.wTree.get_widget('displaySpeed')
         self._stopLogging = self.wTree.get_widget('buttonStopLogging')
@@ -97,11 +99,13 @@ class openBmapGTK:
         self._latitudeLabel = self.wTree.get_widget('labelLatitudeValue')
         self._longitudeLabel = self.wTree.get_widget('labelLongitudeValue')
         self._altitudeLabel = self.wTree.get_widget('labelAltitudeValue')
+        self._timeLabel = self.wTree.get_widget('labelTimeValue')
         self._speedLabel = self.wTree.get_widget('labelSpeedValue')
         self._hpvDopsLabel = self.wTree.get_widget('labelHPVDopsValue')
         self._gpsLabelList = [self._latitudeLabel,
                               self._longitudeLabel,
                               self._altitudeLabel,
+                              self._timeLabel,
                               self._speedLabel,
                               self._hpvDopsLabel]
         
@@ -231,23 +235,24 @@ class openBmapGTK:
             self._nbNeigCurrentLabel.set_text('N/A')
 
         (valid, tstamp, lat, lng, alt, pdop, hdop, vdop, speed, heading) = self._obmlogger.get_gps_data()
-        # uncomment for fake GPS testing for GTKglade debug indoors
+        # uncomment following line for fake GPS testing for GTKglade debug indoors
         #(valid, tstamp, lat, lng, alt, pdop, hdop, vdop, speed, heading) = (True, 1318163563, 45.794167, 15.918129, 100.072000, 2.380000, 99.990000, 1.000000, 0.900000, 42);
         
         if valid:
             self._gpsPositionLabel.set_text('%s / %s' % (lat, lng))
             self._gpsAltitudeLabel.set_text('%s' % alt)
+            self._gpsTimeLabel.set_text('%s' % tstamp)
             self._dops.set_text('%s/%s/%s' % (pdop, hdop, vdop))
             self._speed.set_text('%s' % speed)
             
             self._latitudeLabel.set_text('%s' % lat)
             self._longitudeLabel.set_text('%s' % lng)
             self._altitudeLabel.set_text('%i' % alt)
+            self._timeLabel.set_text('%s' % time.strftime('%H:%M:%S', time.gmtime(tstamp)))
             self._speedLabel.set_text('%.2f' % speed)
             self._hpvDopsLabel.set_text('%s\n%s\n%s' % (pdop, hdop, vdop))
         else:
-            for w in [self._gpsPositionLabel, self._gpsAltitudeLabel, self._dops,
-                       self._speed]:
+            for w in [self._timeLabel, self._dops, self._speed]:
                 w.set_text('N/A')
             
             for w in self._gpsLabelList:
