@@ -248,7 +248,7 @@ class openBmapGTK:
             self._latitudeLabel.set_text('%s' % lat)
             self._longitudeLabel.set_text('%s' % lng)
             self._altitudeLabel.set_text('%i' % alt)
-            self._timeLabel.set_text('%s' % time.strftime('%H:%M:%S', time.gmtime(tstamp)))
+            self._timeLabel.set_text('%s' % time.strftime('%Y-%m-%d\n%H:%M:%S', time.gmtime(tstamp)))
             self._speedLabel.set_text('%.2f' % speed)
             self._hpvDopsLabel.set_text('%s\n%s\n%s' % (pdop, hdop, vdop))
         else:
