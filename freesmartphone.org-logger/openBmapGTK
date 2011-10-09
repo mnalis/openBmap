@@ -134,17 +134,23 @@ class openBmapGTK:
         
         context = self._cidLabel.get_pango_context()
         font = context.get_font_description()
-        self._biggerLabels = [self._cidLabel, self._speedLabel, self._hpvDopsLabel]
-        self._biggerLabels2 = [self._hpvDopsLabel, self._nbServSinceStartLabel,
+        self._biggerLabels = [self._cidLabel, self._speedLabel]
+        self._biggerLabels2 = [self._nbServSinceStartLabel,
                                self._nbServSinceLaunchLabel,
-                               self._nbNeigSinceStartLabel, self._nbNeigSinceLaunchLabel,
+                               self._nbNeigSinceStartLabel, 
+                               self._nbNeigSinceLaunchLabel,
                                self._nbNeigCurrentLabel,
                                self._LoggingStatusLabel]
-        font.set_size(int(font.get_size() * 3))
+        self._biggerLabels3 = [ self._hpvDopsLabel ]
+        self._org_fontsize = font.get_size()
+        font.set_size(int(self._org_fontsize * 3))
         for l in self._biggerLabels:
             l.modify_font(font)
-        font.set_size(int(font.get_size() *2/3))
+        font.set_size(int(self._org_fontsize * 2))
         for l in self._biggerLabels2:
+            l.modify_font(font)
+        font.set_size(int(self._org_fontsize * 1.5))
+        for l in self._biggerLabels3:
             l.modify_font(font)
 
     def next_window(self, widget):
@@ -225,6 +231,9 @@ class openBmapGTK:
             self._nbNeigCurrentLabel.set_text('N/A')
 
         (valid, tstamp, lat, lng, alt, pdop, hdop, vdop, speed, heading) = self._obmlogger.get_gps_data()
+        # uncomment for fake GPS testing for GTKglade debug indoors
+        #(valid, tstamp, lat, lng, alt, pdop, hdop, vdop, speed, heading) = (True, 1318163563, 45.794167, 15.918129, 100.072000, 2.380000, 99.990000, 1.000000, 0.900000, 42);
+        
         if valid:
             self._gpsPositionLabel.set_text('%s / %s' % (lat, lng))
             self._gpsAltitudeLabel.set_text('%s' % alt)

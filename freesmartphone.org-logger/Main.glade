@@ -907,7 +907,6 @@
                         <child>
                           <widget class="GtkTable" id="table7">
                             <property name="visible">True</property>
-                            <property name="n_rows">2</property>
                             <property name="n_columns">3</property>
                             <child>
                               <widget class="GtkTable" id="table9">
@@ -955,8 +954,9 @@
                             <child>
                               <widget class="GtkLabel" id="labelHPVDops">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">HPV Dops</property>
+                                <property name="label" translatable="yes">HPV Dop</property>
                                 <property name="justify">center</property>
+                                <property name="single_line_mode">True</property>
                                 <property name="angle">90</property>
                               </widget>
                               <packing>
@@ -964,52 +964,40 @@
                                 <property name="right_attach">2</property>
                               </packing>
                             </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
                           </widget>
                           <packing>
                             <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkHBox" id="hbox2">
+                          <widget class="GtkTable" id="tableGPSPos">
                             <property name="visible">True</property>
+                            <property name="n_rows">2</property>
+                            <property name="n_columns">4</property>
                             <child>
-                              <widget class="GtkLabel" id="labelLatitude">
+                              <widget class="GtkLabel" id="labelAltitudeValue">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Lat :</property>
-                                <property name="justify">center</property>
-                              </widget>
-                              <packing>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <widget class="GtkLabel" id="labelLatitudeValue">
-                                <property name="visible">True</property>
+                                <property name="xalign">0.10000000149011612</property>
                                 <property name="label" translatable="yes">N/A</property>
                                 <property name="justify">center</property>
-                                <property name="ellipsize">end</property>
                               </widget>
                               <packing>
-                                <property name="position">1</property>
+                                <property name="left_attach">3</property>
+                                <property name="right_attach">4</property>
+                                <property name="y_options">GTK_SHRINK | GTK_FILL</property>
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkLabel" id="labelLongitude">
+                              <widget class="GtkLabel" id="labelAltitude">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Lon :</property>
+                                <property name="xalign">0.85000002384185791</property>
+                                <property name="label" translatable="yes">Alt:</property>
                                 <property name="justify">center</property>
                               </widget>
                               <packing>
-                                <property name="position">2</property>
+                                <property name="left_attach">2</property>
+                                <property name="right_attach">3</property>
+                                <property name="y_options">GTK_SHRINK | GTK_FILL</property>
                               </packing>
                             </child>
                             <child>
@@ -1020,36 +1008,69 @@
                                 <property name="ellipsize">end</property>
                               </widget>
                               <packing>
-                                <property name="position">3</property>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                                <property name="y_options">GTK_SHRINK | GTK_FILL</property>
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkLabel" id="labelAltitude">
+                              <widget class="GtkLabel" id="labelLongitude">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">Alt :</property>
+                                <property name="xpad">2</property>
+                                <property name="label" translatable="yes">Lon:</property>
                                 <property name="justify">center</property>
                               </widget>
                               <packing>
-                                <property name="position">4</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                                <property name="x_options">GTK_SHRINK | GTK_FILL</property>
+                                <property name="y_options">GTK_SHRINK | GTK_FILL</property>
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkLabel" id="labelAltitudeValue">
+                              <widget class="GtkLabel" id="labelLatitudeValue">
                                 <property name="visible">True</property>
                                 <property name="label" translatable="yes">N/A</property>
                                 <property name="justify">center</property>
+                                <property name="ellipsize">end</property>
                               </widget>
                               <packing>
-                                <property name="position">5</property>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="y_options">GTK_SHRINK | GTK_FILL</property>
                               </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="labelLatitude">
+                                <property name="visible">True</property>
+                                <property name="xpad">2</property>
+                                <property name="label" translatable="yes">Lat:</property>
+                                <property name="justify">center</property>
+                              </widget>
+                              <packing>
+                                <property name="x_options">GTK_SHRINK | GTK_FILL</property>
+                                <property name="y_options">GTK_SHRINK | GTK_FILL</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
                             </child>
                           </widget>
                           <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
                       </widget>
                       <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
@@ -1101,6 +1122,8 @@
             </child>
           </widget>
           <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
             <property name="position">4</property>
           </packing>
         </child>
@@ -1254,6 +1277,7 @@
             </child>
           </widget>
           <packing>
+            <property name="expand">False</property>
             <property name="position">5</property>
           </packing>
         </child>
