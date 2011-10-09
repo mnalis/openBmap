@@ -738,10 +738,21 @@ class Gps:
         obj = dbus.SystemBus().get_object('org.freesmartphone.ousaged', '/org/freesmartphone/Usage')
         request = dbus.Interface(obj, 'org.freesmartphone.Usage').RequestResource('GPS')
         if (request == None):
-            logging.info("GPS ressource succesfully requested (%s)." % request)
+            logging.info("GPS resource succesfully requested (%s)." % request)
             return True
         else:
             logging.critical("ERROR requesting the GPS (%s)" % request)
+            return False
+
+    def release(self):
+        """Releases the GPS resource through /org/freesmartphone/Usage."""
+        obj = dbus.SystemBus().get_object('org.freesmartphone.ousaged', '/org/freesmartphone/Usage')
+        release = dbus.Interface(obj, 'org.freesmartphone.Usage').ReleaseResource('GPS')
+        if (release == None):
+            logging.info("GPS resource succesfully released (%s)." % release)
+            return True
+        else:
+            logging.info("ERROR releasing the GPS (%s)" % release)
             return False
     
     def get_GPS_data(self):
@@ -964,6 +975,17 @@ class ObmLogger():
             return True
         else:
             logging.critical("ERROR requesting the resource '%s' (%s)" % (resource, request))
+            return False
+        
+    def release_ressource(self, resource):
+        """Releases the given string resource through /org/freesmartphone/Usage."""
+        obj = self._bus.get_object('org.freesmartphone.ousaged', '/org/freesmartphone/Usage')
+        release = dbus.Interface(obj, 'org.freesmartphone.Usage').ReleaseResource(resource)
+        if (release == None):
+            logging.info("'%s' resource succesfully released (%s)." % (resource, release))
+            return True
+        else:
+            logging.critical("ERROR releasing the resource '%s' (%s)" % (resource, release))
             return False
         
     def test_write_obm_log(self):
@@ -1290,6 +1312,8 @@ class ObmLogger():
 
         * Saves logs in memory if any."""
         self.write_obm_log_to_disk()
+        self._gps.release()
+        self.release_ressource('CPU')
 
     def load_active_plugins(self):
         """Tries loading active plugins. Returns a list of successfully loaded pluging."""
