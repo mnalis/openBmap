@@ -966,7 +966,7 @@ class ObmLogger():
         """Gets the config object used."""
         return config
 
-    def request_ressource(self, resource):
+    def request_resource(self, resource):
         """Requests the given string resource through /org/freesmartphone/Usage."""
         obj = self._bus.get_object('org.freesmartphone.ousaged', '/org/freesmartphone/Usage')
         request = dbus.Interface(obj, 'org.freesmartphone.Usage').RequestResource(resource)
@@ -977,7 +977,7 @@ class ObmLogger():
             logging.critical("ERROR requesting the resource '%s' (%s)" % (resource, request))
             return False
         
-    def release_ressource(self, resource):
+    def release_resource(self, resource):
         """Releases the given string resource through /org/freesmartphone/Usage."""
         obj = self._bus.get_object('org.freesmartphone.ousaged', '/org/freesmartphone/Usage')
         release = dbus.Interface(obj, 'org.freesmartphone.Usage').ReleaseResource(resource)
@@ -1286,7 +1286,7 @@ class ObmLogger():
     def init_openBmap(self):
         self._gps.request()
         # this is intended to prevent the phone to go to suspend
-        self.request_ressource('CPU')
+        self.request_resource('CPU')
         
         logDir = self.get_config_value(self.GENERAL, self.OBM_LOGS_DIR_NAME)
         if not os.path.exists(logDir):
@@ -1313,7 +1313,7 @@ class ObmLogger():
         * Saves logs in memory if any."""
         self.write_obm_log_to_disk()
         self._gps.release()
-        self.release_ressource('CPU')
+        self.release_resource('CPU')
 
     def load_active_plugins(self):
         """Tries loading active plugins. Returns a list of successfully loaded pluging."""
