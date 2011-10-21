@@ -1,4 +1,4 @@
-l#!/usr/bin/python
+#!/usr/bin/python
 
 # Copyright 2008, 2009 Ronan DANIELLOU
 # Copyright 2008, 2009 Onen (onen.om@free.fr)
