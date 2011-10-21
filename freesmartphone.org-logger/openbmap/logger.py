@@ -1,4 +1,4 @@
-#!/usr/bin/python
+l#!/usr/bin/python
 
 # Copyright 2008, 2009 Ronan DANIELLOU
 # Copyright 2008, 2009 Onen (onen.om@free.fr)
@@ -1034,7 +1034,7 @@ class ObmLogger():
         logmsg += "</scan>\n"
         logging.info(logmsg)
         self.fileToSendLock.acquire()
-        logging.info('OpenBmap log file lock acquired.')
+        logging.info('OpenBmap log file lock acquired by write_obm_log.')
         #debug
         #self._gsm._call_ongoing = True
         #end of debug
@@ -1200,7 +1200,7 @@ class ObmLogger():
         logsDir = self.get_config_value(self.GENERAL, self.OBM_LOGS_DIR_NAME)
         
         self.fileToSendLock.acquire()
-        logging.info('OpenBmap log file lock acquired.')
+        logging.info('OpenBmap log file lock acquired by send_logs.')
         try:
             if not self.check_obm_api_version():
                 logging.error('We do not support the server API version,' + \
