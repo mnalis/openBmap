@@ -1058,7 +1058,7 @@ class ObmLogger():
                 logging.debug('Current size of logs in memory %i bytes, max size of log files is %i bytes.'
                               % (fileLengthInByte, maxLogsFileSize))
             else:
-                self.write_obm_log_to_disk_unprotected()
+                self.write_gsm_log_to_disk_unprotected()
             self._logsInMemory.append(logmsg)
             self._logsInMemoryLengthInByte += len(logmsg)
         else:
@@ -1068,7 +1068,7 @@ class ObmLogger():
                 logging.debug('Max logs per file (%i/%i) not reached, wait to write to a file.'
                               % (len(self._logsInMemory), self.get_config_value(self.GENERAL, self.NB_OF_LOGS_PER_FILE)))
             else:
-                self.write_obm_log_to_disk_unprotected()
+                self.write_gsm_log_to_disk_unprotected()
 
         self.fileToSendLock.release()
         logging.info('OpenBmap log file lock released.')
@@ -1112,7 +1112,7 @@ class ObmLogger():
                 )
 
     def write_obm_log_to_disk(self):
-        """Gets the Lock and then calls write_obm_log_to_disk_unprotected()."""
+        """Gets the Lock and then calls write_gsm_log_to_disk_unprotected()."""
         self.fileToSendLock.acquire()
         logging.info('OpenBmap log file lock acquired by write_obm_log_to_disk().')
         self.write_gsm_log_to_disk_unprotected()
