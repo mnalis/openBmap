@@ -1198,6 +1198,7 @@ class ObmLogger():
         # to store the data once sent:
         dirProcessed = os.path.join(self.get_config_value(self.GENERAL, self.OBM_PROCESSED_LOGS_DIR_NAME))
         logsDir = self.get_config_value(self.GENERAL, self.OBM_LOGS_DIR_NAME)
+        logsDir = os.path.join(logsDir, "FSO_GSM")
         
         self.fileToSendLock.acquire()
         logging.info('OpenBmap log file lock acquired by send_logs.')
