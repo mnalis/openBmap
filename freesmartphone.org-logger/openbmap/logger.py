@@ -738,10 +738,21 @@ class Gps:
         obj = dbus.SystemBus().get_object('org.freesmartphone.ousaged', '/org/freesmartphone/Usage')
         request = dbus.Interface(obj, 'org.freesmartphone.Usage').RequestResource('GPS')
         if (request == None):
-            logging.info("GPS ressource succesfully requested (%s)." % request)
+            logging.info("GPS resource succesfully requested (%s)." % request)
             return True
         else:
             logging.critical("ERROR requesting the GPS (%s)" % request)
+            return False
+
+    def release(self):
+        """Releases the GPS resource through /org/freesmartphone/Usage."""
+        obj = dbus.SystemBus().get_object('org.freesmartphone.ousaged', '/org/freesmartphone/Usage')
+        release = dbus.Interface(obj, 'org.freesmartphone.Usage').ReleaseResource('GPS')
+        if (release == None):
+            logging.info("GPS resource succesfully released (%s)." % release)
+            return True
+        else:
+            logging.info("ERROR releasing the GPS (%s)" % release)
             return False
     
     def get_GPS_data(self):
@@ -955,7 +966,7 @@ class ObmLogger():
         """Gets the config object used."""
         return config
 
-    def request_ressource(self, resource):
+    def request_resource(self, resource):
         """Requests the given string resource through /org/freesmartphone/Usage."""
         obj = self._bus.get_object('org.freesmartphone.ousaged', '/org/freesmartphone/Usage')
         request = dbus.Interface(obj, 'org.freesmartphone.Usage').RequestResource(resource)
@@ -964,6 +975,17 @@ class ObmLogger():
             return True
         else:
             logging.critical("ERROR requesting the resource '%s' (%s)" % (resource, request))
+            return False
+        
+    def release_resource(self, resource):
+        """Releases the given string resource through /org/freesmartphone/Usage."""
+        obj = self._bus.get_object('org.freesmartphone.ousaged', '/org/freesmartphone/Usage')
+        release = dbus.Interface(obj, 'org.freesmartphone.Usage').ReleaseResource(resource)
+        if (release == None):
+            logging.info("'%s' resource succesfully released (%s)." % (resource, release))
+            return True
+        else:
+            logging.critical("ERROR releasing the resource '%s' (%s)" % (resource, release))
             return False
         
     def test_write_obm_log(self):
@@ -1012,7 +1034,7 @@ class ObmLogger():
         logmsg += "</scan>\n"
         logging.info(logmsg)
         self.fileToSendLock.acquire()
-        logging.info('OpenBmap log file lock acquired.')
+        logging.info('OpenBmap log file lock acquired by write_obm_log.')
         #debug
         #self._gsm._call_ongoing = True
         #end of debug
@@ -1036,7 +1058,7 @@ class ObmLogger():
                 logging.debug('Current size of logs in memory %i bytes, max size of log files is %i bytes.'
                               % (fileLengthInByte, maxLogsFileSize))
             else:
-                self.write_obm_log_to_disk_unprotected()
+                self.write_gsm_log_to_disk_unprotected()
             self._logsInMemory.append(logmsg)
             self._logsInMemoryLengthInByte += len(logmsg)
         else:
@@ -1046,7 +1068,7 @@ class ObmLogger():
                 logging.debug('Max logs per file (%i/%i) not reached, wait to write to a file.'
                               % (len(self._logsInMemory), self.get_config_value(self.GENERAL, self.NB_OF_LOGS_PER_FILE)))
             else:
-                self.write_obm_log_to_disk_unprotected()
+                self.write_gsm_log_to_disk_unprotected()
 
         self.fileToSendLock.release()
         logging.info('OpenBmap log file lock released.')
@@ -1090,7 +1112,7 @@ class ObmLogger():
                 )
 
     def write_obm_log_to_disk(self):
-        """Gets the Lock and then calls write_obm_log_to_disk_unprotected()."""
+        """Gets the Lock and then calls write_gsm_log_to_disk_unprotected()."""
         self.fileToSendLock.acquire()
         logging.info('OpenBmap log file lock acquired by write_obm_log_to_disk().')
         self.write_gsm_log_to_disk_unprotected()
@@ -1176,9 +1198,10 @@ class ObmLogger():
         # to store the data once sent:
         dirProcessed = os.path.join(self.get_config_value(self.GENERAL, self.OBM_PROCESSED_LOGS_DIR_NAME))
         logsDir = self.get_config_value(self.GENERAL, self.OBM_LOGS_DIR_NAME)
+        logsDir = os.path.join(logsDir, "FSO_GSM")
         
         self.fileToSendLock.acquire()
-        logging.info('OpenBmap log file lock acquired.')
+        logging.info('OpenBmap log file lock acquired by send_logs.')
         try:
             if not self.check_obm_api_version():
                 logging.error('We do not support the server API version,' + \
@@ -1264,7 +1287,7 @@ class ObmLogger():
     def init_openBmap(self):
         self._gps.request()
         # this is intended to prevent the phone to go to suspend
-        self.request_ressource('CPU')
+        self.request_resource('CPU')
         
         logDir = self.get_config_value(self.GENERAL, self.OBM_LOGS_DIR_NAME)
         if not os.path.exists(logDir):
@@ -1290,6 +1313,8 @@ class ObmLogger():
 
         * Saves logs in memory if any."""
         self.write_obm_log_to_disk()
+        self._gps.release()
+        self.release_resource('CPU')
 
     def load_active_plugins(self):
         """Tries loading active plugins. Returns a list of successfully loaded pluging."""
