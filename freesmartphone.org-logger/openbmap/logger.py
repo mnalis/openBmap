@@ -876,8 +876,10 @@ class ObmLogger():
                   ObmLogger.APP_HOME_DIR)
             os.mkdir(ObmLogger.APP_HOME_DIR)
 
+        logging.info("Requesting GPS...")
         self._gps = Gps()
         # start GPS ASAP, to give it time to get fix
+        #logging.info("Will now request GPS resource...")
         self._gps.request()
         self._observers = []
 
@@ -1679,6 +1681,7 @@ if not os.path.exists(ObmLogger.APP_HOME_DIR):
             
 logging.basicConfig(filename=ObmLogger.TEMP_LOG_FILENAME,
             level=logging.INFO,
+            format='%(asctime)s %(message)s', 
             filemode='w',)
 config = Config(ObmLogger.CONFIGURATION_FILENAME)
 
