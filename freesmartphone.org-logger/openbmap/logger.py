@@ -877,6 +877,8 @@ class ObmLogger():
             os.mkdir(ObmLogger.APP_HOME_DIR)
 
         self._gps = Gps()
+        # start GPS ASAP, to give it time to get fix
+        self._gps.request()
         self._observers = []
 
         # Try getting the list of active plugins objects, to be used for scheduling, etc.
@@ -1285,7 +1287,6 @@ class ObmLogger():
         return bus
     
     def init_openBmap(self):
-        self._gps.request()
         # this is intended to prevent the phone to go to suspend
         self.request_resource('CPU')
         

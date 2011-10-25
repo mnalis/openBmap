@@ -39,6 +39,9 @@ class openBmapGTK:
     """This is a GTK frontend for the openBmap logger."""
 
     def __init__(self):
+        # start GPS ASAP, to give it time to get fix in background while we setup GTK, etc.
+        self._obmlogger = openbmap.logger.ObmLogger()
+        self._obmlogger.register(self)
 
         #Set the Glade file
         possibleGladeFile = None
@@ -132,8 +135,6 @@ class openBmapGTK:
                                     gtk.BUTTONS_NONE,
                                     'Stopping the logger. Please wait...')
         
-        self._obmlogger = openbmap.logger.ObmLogger()
-        self._obmlogger.register(self)
         self._obmlogger.init_openBmap()
         
         context = self._cidLabel.get_pango_context()
